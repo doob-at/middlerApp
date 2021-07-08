@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="doob.middler" Version="0.1.0-beta0004" />
+    <PackageReference Include="System.Reactive.Linq" Version="5.0.0" />
+    <PackageReference Include="doob.Reflectensions.CommonExtensions" Version="6.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\middlerApp.SharedModels\middlerApp.SharedModels.csproj" />
+    <ProjectReference Include="..\middlerApp.DataAccess\middlerApp.DataAccess.Context.csproj" />
+    <ProjectReference Include="..\middlerApp.DataAccess.Sqlite\middlerApp.DataAccess.Sqlite.csproj" />
+    <ProjectReference Include="..\middlerApp.DataAccess.SqlServer\middlerApp.DataAccess.SqlServer.csproj" />
+    <ProjectReference Include="..\..\middlerApp.Events\middlerApp.Events.csproj" />
+    <ProjectReference Include="..\middlerApp.DataAccess.Postgres\middlerApp.DataAccess.Postgres.csproj" />
+  </ItemGroup>
+
+</Project>
