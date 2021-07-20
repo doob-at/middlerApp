@@ -1,6 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.DependencyInjection;
 using middlerApp.DataAccess.Context;
+using middlerApp.DataAccess.Postgres;
+using middlerApp.DataAccess.Sqlite;
+using middlerApp.DataAccess.SqlServer;
 
 namespace middlerApp.DataAccess.MigrationBuilder
 {

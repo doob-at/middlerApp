@@ -1,6 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.DependencyInjection;
 using middlerApp.Auth.Context;
+using middlerApp.Auth.Postgres;
+using middlerApp.Auth.Sqlite;
+using middlerApp.Auth.SqlServer;
 
 namespace middlerApp.Auth.MigrationBuilder
 {

@@ -62,7 +62,7 @@ namespace middlerApp.Api
         public string Provider { get; set; } = "postgres";
 
         public string ConnectionString { get; set; } = //"Data Source=./data/middlerApp.db";
-        "Host=10.0.0.22;Database=MiddlerApp;Username=postgres;Password=postgres";
+        "Host=10.0.0.22;Database=middler;Username=postgres;Password=postgres";
     }
 
     public class Logging

@@ -19,4 +19,10 @@
     <ProjectReference Include="..\Authentication\middlerApp.Auth\middlerApp.Auth.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="localhost.pfx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

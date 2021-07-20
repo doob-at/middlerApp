@@ -103,6 +103,17 @@ namespace middlerApp.Api
 
             });
 
+
+
+            app.MapWhen(context =>
+            {
+                return context.Request.Path.ToString().StartsWith("/_");
+            }, builder =>
+            {
+                builder.Run(context => context.NotFound());
+            });
+
+
             app.UseSpaUI(startUpConfiguration.AdminSettings.WebRoot, "http://127.0.0.1:4200");
         }
 

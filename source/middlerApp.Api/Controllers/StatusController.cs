@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Linq;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using middlerApp.Api.Attributes;
 using middlerApp.Api.ExtensionMethods;
 using middlerApp.Api.Models;
 using OpenIddict.Validation.AspNetCore;
@@ -10,7 +11,7 @@ using OpenIddict.Validation.AspNetCore;
 namespace middlerApp.Api.Controllers
 {
     [Route("_api/status")]
-    
+    [AdminController]
     public class StatusController: Controller
     {
 
@@ -44,13 +45,17 @@ namespace middlerApp.Api.Controllers
         public IActionResult GetAccountInfo()
         {
             
+
+
+
             if (!String.IsNullOrWhiteSpace(this.User.Identity?.Name))
             {
                 var loggedInUser = new LoggedInUser();
                 loggedInUser.UserName = this.User.Identity?.Name;
                 return Ok(loggedInUser);
             }
-            
+
+
             return Unauthorized();
         }
     }
