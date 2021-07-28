@@ -21,12 +21,6 @@
       "dom"
     ],
     "paths": {
-      "@admin-services": [
-          "projects/admin-ui/src/app/shared/services"
-      ],
-      "@admin-services/*": [
-          "projects/admin-ui/src/app/shared/services/*"
-      ]
     }
   },
   "angularCompilerOptions": {

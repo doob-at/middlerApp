@@ -1,7 +1,9 @@
 const PROXY_CONFIG = [
     {
         context: [
-            "/_"
+            "/_",
+            "/.well-known",
+            "/connect"
         ],
         target: "https://localhost:4445",
         changeOrigin: true,

@@ -9,7 +9,7 @@ param (
     [string]$Name
 )
 
-$Name = "$($Name)$((get-date).ToString("yyyy-MM-ddTHH-mm-ss"))"
+$Name = "$($Name)_$((get-date).ToString("yyyy-MM-ddTHH-mm-ss"))"
 
 if ($Context -eq "App") {
     

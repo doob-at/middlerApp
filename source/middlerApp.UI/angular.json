@@ -80,7 +80,9 @@
             },
             "development": {
               "browserTarget": "AdminUI:build:development",
-              "proxyConfig": "projects/admin-ui/proxy.conf.js"
+              "proxyConfig": "projects/admin-ui/proxy.conf.js",
+              "port": 4200,
+              "host": "0.0.0.0"
             }
           },
           "defaultConfiguration": "development"
@@ -139,6 +141,7 @@
               "projects/identity-ui/src/assets"
             ],
             "styles": [
+              "projects/identity-ui/src/theme.less",
               "projects/identity-ui/src/styles.scss"
             ],
             "scripts": []
@@ -184,7 +187,9 @@
             },
             "development": {
               "browserTarget": "IdentityUI:build:development",
-              "proxyConfig": "projects/identity-ui/proxy.conf.js"
+              "proxyConfig": "projects/identity-ui/proxy.conf.js",
+              "port": 4300,
+              "host": "0.0.0.0"
             }
           },
           "defaultConfiguration": "development"

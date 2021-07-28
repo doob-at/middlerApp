@@ -106,20 +106,24 @@ namespace middlerApp.Api
             }
 
 
-            var file = PathHelper.GetFullPath("./data/configuration.json");
-            var directory = new FileInfo(file).Directory;
-            if (!directory.Exists)
+            if (!Static.IsDevelopment)
             {
-                directory.Create();
-            }
+                var file = PathHelper.GetFullPath("./data/configuration.json");
+                var directory = new FileInfo(file).Directory;
+                if (!directory.Exists)
+                {
+                    directory.Create();
+                }
 
-            if (!File.Exists(file))
-            {
-                var json = Json.Converter.ToJson(new StartUpConfiguration(), true);
-                File.WriteAllText(file, json);
-            }
+                if (!File.Exists(file))
+                {
+                    var json = Json.Converter.ToJson(new StartUpConfiguration(), true);
+                    File.WriteAllText(file, json);
+                }
 
-            config.AddJsonFile(file, optional: true);
+                config.AddJsonFile(file, optional: true);
+            }
+            
 
 
             config.AddEnvironmentVariables();

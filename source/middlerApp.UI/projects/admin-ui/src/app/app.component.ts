@@ -1,8 +1,9 @@
 import { Component, ChangeDetectionStrategy, OnInit, ChangeDetectorRef, AfterViewInit } from '@angular/core';
 import { AppInitializeService } from './app-initialize.service';
-import { AppUIService, AuthService } from '@admin-services';
+
 import { tap, share, map, filter } from 'rxjs/operators';
 import { ActivatedRoute, Router, RouterLink, NavigationEnd } from '@angular/router';
+import { AppUIService, AuthQuery, AuthService } from './shared/services';
 
 @Component({
     selector: 'app-root',
@@ -10,55 +11,38 @@ import { ActivatedRoute, Router, RouterLink, NavigationEnd } from '@angular/rout
     styleUrls: ['./app.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class AppComponent implements AfterViewInit {
+export class AppComponent {
 
-    uiContext$ = this.uiService.UIContext$;
     sideBarCollapsed$ = this.uiService.sideBarCollapsed$;
+    uiContext$ = this.uiService.UIContext$;
+    loggedInUser$ = this.authQuery.loggedInUser$;
 
-    currentUser$ = this.auth.currentUser$;
-
-    userName$ = this.currentUser$.pipe(
+    userName$ = this.loggedInUser$.pipe(
         map(user => {
             if (!user) {
                 return null;
             }
-            var name = user.userName;
-            if(user.firstName?.trim() && user.lastName?.trim()) {
-                name = `${user.firstName?.trim()} ${user.lastName?.trim()}`
+            var name = user.UserName;
+            if(user.FirstName?.trim() && user.LastName?.trim()) {
+                name = `${user.FirstName?.trim()} ${user.LastName?.trim()}`
             }
             
-
             return name;
         })
     );
 
-    constructor(private uiService: AppUIService, private router: Router, private auth: AuthService, private route: ActivatedRoute, private cref: ChangeDetectorRef) {
+    constructor(private initService: AppInitializeService, private uiService: AppUIService, private authQuery: AuthQuery, private authService: AuthService) {
 
         uiService.SetDefault(ui => {
             ui.Content.Scrollable = false;
             ui.Content.Container = true;
-            ui.Header.Icon = null
+            ui.Header.Icon = "";
             ui.Footer.Show = false;
         })
 
-        
-               
-        
-    }
-    ngAfterViewInit(): void {
-        
-        // if(location.pathname == "/first-setup") {
-        //     setTimeout(() => {
-        //         this.uiService.Set(ui => {
-        //             ui.Sidebar.Hide = true;
-        //             ui.Content.ShowAlways = true;
-        //             this.cref.detectChanges();
-        //         })
-        //     }, 1000);
-            
-        // }
     }
     
+       
     identity = false;
 
     toggleSideBar() {
@@ -66,11 +50,11 @@ export class AppComponent implements AfterViewInit {
     }
 
     Login() {
-        this.auth.LogIn();
+        this.authService.LogIn();
     }
 
     Logout() {
-        this.auth.LogOut();
+        this.authService.LogOut();
     }
 
 }

@@ -77,6 +77,8 @@ namespace middlerApp.Api
 
             app.UseWhen(context => context.IsAdminAreaRequest(), _app => ConfigureAdministration(_app, startUpConfiguration));
 
+            app.UseWhen(context => context.IsIdpAreaRequest(), _app => ConfigureIDP(_app, startUpConfiguration));
+
           
         }
 
@@ -133,7 +135,7 @@ namespace middlerApp.Api
 
             });
 
-            app.UseSpaUI(startUpConfiguration.IdpSettings.WebRoot, "http://127.0.0.1:4200");
+            app.UseSpaUI(startUpConfiguration.IdpSettings.WebRoot, "http://127.0.0.1:4300");
         }
 
         //public void ConfigureMiddler(IApplicationBuilder app)
@@ -145,7 +147,7 @@ namespace middlerApp.Api
         //    app.UseAuthorization();
 
 
-            
+
         //    app.UseMiddler(map =>
         //    {
         //        map.AddRepo<EFCoreMiddlerRepository>();

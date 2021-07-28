@@ -7,7 +7,7 @@ namespace middlerApp.Auth.Context
     public class AuthDbContext: DbContext
     {
 
-        public DbSet<AuthApplication> Applications { get; set; }
+        public DbSet<AuthApplication> AuthApplications { get; set; }
         public DbSet<AuthAuthorization> AuthAuthorizations { get; set; }
         public DbSet<AuthScope> AuthScopes { get; set; }
         public DbSet<AuthToken> AuthTokens { get; set; }

@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Authentication.Negotiate;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using middlerApp.Api.Attributes;
+using middlerApp.API.Helper;
 using OpenIddict.Abstractions;
 using OpenIddict.Server.AspNetCore;
 
@@ -20,11 +21,20 @@ namespace middlerApp.Api.Controllers.Auth
     public class AuthorizationController : Controller
     {
        
+        private readonly IAuthenticationSchemeProvider _schemeProvider;
 
-
-        public AuthorizationController()
+        public AuthorizationController(IAuthenticationSchemeProvider schemeProvider)
         {
-            
+            _schemeProvider = schemeProvider;
+        }
+
+        [HttpGet("login")]
+        [GenerateAntiForgeryToken]
+        public async Task<IActionResult> Login(string returnUrl)
+        {
+            // build a model so we know what to show on the login page
+            var vm = await BuildLoginViewModelAsync(returnUrl);
+            return Ok(vm);
         }
 
         [HttpGet("~/connect/authorize")]
@@ -123,6 +133,12 @@ namespace middlerApp.Api.Controllers.Auth
 
             var dict = claimsPrincipal.Claims.ToDictionary(c => c.Type, c => c.Value);
             return Ok(dict);
+        }
+
+
+        private async Task<LoginViewModel> BuildLoginViewModelAsync(string returnUrl)
+        {
+
         }
     }
 }

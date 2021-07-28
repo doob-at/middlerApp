@@ -58,6 +58,7 @@ namespace middlerApp.Api.ExtensionMethods
                 app.UseSpa(spa =>
                 {
                     spa.UseProxyToSpaDevelopmentServer(devProxy);
+                    
                 });
             }
             else

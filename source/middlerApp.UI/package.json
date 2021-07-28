@@ -6,7 +6,13 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "serve:admin": "ng serve AdminUI --ssl true --ssl-cert localhost.crt --ssl-key localhost.key",
+    "build:admin": "ng build AdminUI --prod",
+    "serve:identityssl": "ng serve IdentityUI --ssl true --ssl-cert localhost.crt --ssl-key localhost.key",
+    "serve:identity": "ng serve IdentityUI",
+    "build:identity": "ng build IdentityUI --prod",
+    "bundle-report": "webpack-bundle-analyzer dist/stats.json"
   },
   "private": true,
   "dependencies": {
@@ -20,9 +26,18 @@
     "@angular/router": "~12.1.1",
     "@datorama/akita": "^6.2.1",
     "@datorama/akita-ng-router-store": "^6.0.0",
+    "@doob-ng/antd-extensions": "^0.3.0",
+    "@doob-ng/core": "^1.3.0",
+    "@fortawesome/angular-fontawesome": "^0.6.1",
+    "@fortawesome/fontawesome-svg-core": "^1.2.35",
+    "@fortawesome/free-brands-svg-icons": "^5.15.3",
+    "@fortawesome/free-regular-svg-icons": "^5.15.3",
+    "@fortawesome/free-solid-svg-icons": "^5.15.3",
+    "angular-oauth2-oidc": "^12.0.0",
     "ng-zorro-antd": "^12.0.1",
     "rxjs": "~6.6.0",
     "tslib": "^2.2.0",
+    "webpack-bundle-analyzer": "^4.4.2",
     "zone.js": "~0.11.4"
   },
   "devDependencies": {

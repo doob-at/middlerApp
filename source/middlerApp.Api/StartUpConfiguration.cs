@@ -91,8 +91,8 @@ namespace middlerApp.Api
         {
             return new Dictionary<string, LogEventLevel>(StringComparer.OrdinalIgnoreCase)
             {
-                ["Default"] = LogEventLevel.Warning,
-                ["Microsoft.Hosting.Lifetime"] = LogEventLevel.Warning
+                ["Default"] = LogEventLevel.Debug,
+                ["Microsoft.Hosting.Lifetime"] = LogEventLevel.Debug
             };
         }
     }
