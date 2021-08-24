@@ -3,5 +3,5 @@ using OpenIddict.EntityFrameworkCore.Models;
 
 namespace middlerApp.Auth.Entities
 {
-    public class AuthAuthorization : OpenIddictEntityFrameworkCoreAuthorization<Guid, AuthApplication, AuthToken> { }
+    public class AuthAuthorization : OpenIddictEntityFrameworkCoreAuthorization<Guid, Client, AuthToken> { }
 }

@@ -51,7 +51,7 @@ namespace middlerApp.Auth.Stores
         /// <summary>
         /// Gets the database set corresponding to the <typeparamref name="AuthApplication"/> entity.
         /// </summary>
-        private DbSet<AuthApplication> Applications => Context.Set<AuthApplication>();
+        private DbSet<Client> Applications => Context.Set<Client>();
 
         /// <summary>
         /// Gets the database set corresponding to the <typeparamref name="AuthAuthorization"/> entity.

@@ -1,14 +1,20 @@
 ﻿using System;
-using Microsoft.AspNetCore.Authentication.Negotiate;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using middlerApp.Auth.Context;
 using middlerApp.Auth.Entities;
+using middlerApp.Auth.Managers;
 using middlerApp.Auth.Postgres;
+using middlerApp.Auth.Resolvers;
+using middlerApp.Auth.Services;
 using middlerApp.Auth.Sqlite;
 using middlerApp.Auth.SqlServer;
+using middlerApp.Auth.Stores;
 using OpenIddict.Abstractions;
+using OpenIddict.Validation.AspNetCore;
 
 namespace middlerApp.Auth
 {
@@ -16,9 +22,24 @@ namespace middlerApp.Auth
     {
         public static void AddOpenIdDictAuthentication(this IServiceCollection services, string provider, string connectionstring)
         {
-            
-            services.AddAuthentication(NegotiateDefaults.AuthenticationScheme)
-                .AddNegotiate(options => { });
+
+            services.AddAuthentication(sharedOptions =>
+                {
+                    
+                sharedOptions.DefaultAuthenticateScheme = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme;
+                sharedOptions.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                sharedOptions.DefaultChallengeScheme = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme;
+            })
+                
+                //.AddNegotiate(NegotiateDefaults.AuthenticationScheme,"Windows", options =>
+                //{
+
+                //})
+                .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
+                {
+                    options.LoginPath = "/auth/login";
+                    options.LogoutPath = "/auth/logout";
+                }); ;
 
             services.AddDbContext<AuthDbContext>(options =>
             {
@@ -50,9 +71,14 @@ namespace middlerApp.Auth
                 //options.UseInMemoryDatabase(nameof(AuthDbContext));
 
                 // Register the entity sets needed by OpenIddict.
-                options.UseOpenIddict<AuthApplication, AuthAuthorization, AuthScope, AuthToken, Guid>();
+                /*options.UseOpenIddict<Guid>()*/;
             });
 
+            services.AddScoped<IAuthenticationProviderService, AuthenticationProviderService>();
+
+            services.AddScoped<IPasswordHasher<MUser>, PasswordHasher<MUser>>();
+            services.AddScoped<ILocalUserService, LocalUserService>();
+            services.AddScoped<IRolesService, RolesService>();
 
             services.Configure<IdentityOptions>(options =>
             {
@@ -69,8 +95,41 @@ namespace middlerApp.Auth
                 .AddCore(options =>
                 {
                     // Configure OpenIddict to use the EF Core stores/models.
-                    options.UseEntityFrameworkCore().UseDbContext<AuthDbContext>().ReplaceDefaultEntities<AuthApplication, AuthAuthorization, AuthScope, AuthToken, Guid>();
+                    options.UseEntityFrameworkCore().UseDbContext<AuthDbContext>();
+
+                    options.ReplaceApplicationManager(typeof(AuthApplicationManager))
+                        .ReplaceAuthorizationManager(typeof(AuthAuthorizationManager))
+                        .ReplaceScopeManager(typeof(AuthScopeManager))
+                        .ReplaceTokenManager(typeof(AuthTokenManager));
+
+                    //options.Services.TryAddScoped(provider => (IOpenIddictApplicationManager)
+                    //    provider.GetRequiredService<IOpenIddictApplicationManager>());
+                    //options.Services.TryAddScoped(provider => (IOpenIddictAuthorizationManager)
+                    //    provider.GetRequiredService<IOpenIddictAuthorizationManager>());
+                    //options.Services.TryAddScoped(provider => (IOpenIddictScopeManager)
+                    //    provider.GetRequiredService<IOpenIddictScopeManager>());
+                    //options.Services.TryAddScoped(provider => (IOpenIddictTokenManager)
+                    //    provider.GetRequiredService<IOpenIddictTokenManager>());
                     
+                    options.SetDefaultApplicationEntity<Client>()
+                        .SetDefaultAuthorizationEntity<AuthAuthorization>()
+                        .SetDefaultScopeEntity<AuthScope>()
+                        .SetDefaultTokenEntity<AuthToken>();
+
+                    options.ReplaceApplicationStoreResolver<AuthApplicationStoreResolver>()
+                        .ReplaceAuthorizationStoreResolver<AuthAuthorizationStoreResolver>()
+                        .ReplaceScopeStoreResolver<AuthScopeStoreResolver>()
+                        .ReplaceTokenStoreResolver<AuthTokenStoreResolver>();
+
+                    options.Services.TryAddSingleton<AuthApplicationStoreResolver.TypeResolutionCache>();
+                    options.Services.TryAddSingleton<AuthAuthorizationStoreResolver.TypeResolutionCache>();
+                    options.Services.TryAddSingleton<AuthScopeStoreResolver.TypeResolutionCache>();
+                    options.Services.TryAddSingleton<AuthTokenStoreResolver.TypeResolutionCache>();
+
+                    options.Services.TryAddScoped(typeof(AuthApplicationStore));
+                    options.Services.TryAddScoped(typeof(AuthAuthorizationStore));
+                    options.Services.TryAddScoped(typeof(AuthScopeStore));
+                    options.Services.TryAddScoped(typeof(AuthTokenStore));
                 })
 
                 // Register the OpenIddict server components.
@@ -79,23 +138,25 @@ namespace middlerApp.Auth
                     options
                         .SetTokenEndpointUris("/connect/token")
                         .SetUserinfoEndpointUris("/connect/userinfo")
-                        .SetIntrospectionEndpointUris("/connect/introspect");
+                        .SetIntrospectionEndpointUris("/connect/introspect")
+                        .SetAuthorizationEndpointUris("/connect/authorize")
+                        .SetLogoutEndpointUris("/connect/logout")
+                        ;
 
 
                     options
                         .AllowPasswordFlow()
                         .AllowRefreshTokenFlow()
-                        .AllowClientCredentialsFlow();
-
-                    options.RegisterScopes(OpenIddictConstants.Permissions.Scopes.Email,
-                        OpenIddictConstants.Permissions.Scopes.Profile,
-                        OpenIddictConstants.Permissions.Scopes.Roles);
+                        .AllowClientCredentialsFlow()
+                        .AllowAuthorizationCodeFlow()
+                        ;
 
 
                     options
                         .UseReferenceAccessTokens()
                         .UseReferenceRefreshTokens();
 
+                    options.RegisterScopes(OpenIddictConstants.Scopes.Email, OpenIddictConstants.Scopes.Profile, OpenIddictConstants.Scopes.Roles, "dataEventRecords");
 
                     options.SetAccessTokenLifetime(TimeSpan.FromMinutes(30));
                     options.SetRefreshTokenLifetime(TimeSpan.FromDays(7));
@@ -108,9 +169,12 @@ namespace middlerApp.Auth
                         .UseAspNetCore()
                         .DisableTransportSecurityRequirement()
                         .EnableTokenEndpointPassthrough()
-                        .EnableUserinfoEndpointPassthrough();
+                        .EnableUserinfoEndpointPassthrough()
+                        .EnableAuthorizationEndpointPassthrough();
 
-                    options.AddEventHandler(CustomValidateResourceOwnerCredentialsParameters.Descriptor);
+                    //options.AddEventHandler(CustomValidateResourceOwnerCredentialsParameters.Descriptor);
+
+                    options.DisableScopeValidation();
 
                 })
                 .AddValidation(options =>
@@ -120,8 +184,20 @@ namespace middlerApp.Auth
                 });
 
            
+            services.AddAuthorization((options) =>
+            {
+                options.AddPolicy("Admin", policy =>
+                {
+                    policy.RequireAuthenticatedUser();
+                    policy.RequireRole("Administrators");
+                });
+            });
 
-            services.AddHostedService<TestData>();
+            //services.AddHostedService<TestData>();
+
+            services.AddScoped<DefaultResourcesManager>();
+
+            services.AddHostedService<EnsureDefaultResourcesExistsService>();
 
         }
     }

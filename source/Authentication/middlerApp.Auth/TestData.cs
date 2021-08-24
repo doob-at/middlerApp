@@ -26,25 +26,29 @@ namespace middlerApp.Auth
 
             var manager = scope.ServiceProvider.GetRequiredService<IOpenIddictApplicationManager>();
 
-            if (await manager.FindByClientIdAsync("postman", cancellationToken) is null)
+            if (await manager.FindByClientIdAsync("scsmportal", cancellationToken) is null)
             {
                 await manager.CreateAsync(new OpenIddictApplicationDescriptor
                 {
-                    ClientId = "postman",
-                    ClientSecret = "postman-secret",
-                    DisplayName = "Postman",
+                    ClientId = "scsmportal",
+                    //ClientSecret = "postman-secret",
+                    DisplayName = "Scsm Portal",
                     Permissions =
                     {
+                        OpenIddictConstants.Permissions.Endpoints.Authorization,
+                        OpenIddictConstants.Permissions.Endpoints.Logout,
                         OpenIddictConstants.Permissions.Endpoints.Token,
-                        OpenIddictConstants.Permissions.Endpoints.Introspection,
-
+                        OpenIddictConstants.Permissions.Endpoints.Revocation,
+                        OpenIddictConstants.Permissions.GrantTypes.AuthorizationCode,
                         OpenIddictConstants.Permissions.GrantTypes.ClientCredentials,
-                        OpenIddictConstants.Permissions.GrantTypes.Password,
                         OpenIddictConstants.Permissions.GrantTypes.RefreshToken,
-
-                        OpenIddictConstants.Permissions.Prefixes.Scope + "api",
-                        OpenIddictConstants.Permissions.ResponseTypes.Code
-                    }
+                        OpenIddictConstants.Permissions.ResponseTypes.Code,
+                        OpenIddictConstants.Permissions.Scopes.Email,
+                        OpenIddictConstants.Permissions.Scopes.Profile,
+                        OpenIddictConstants.Permissions.Scopes.Roles,
+                        OpenIddictConstants.Permissions.Prefixes.Scope + "dataEventRecords"
+                    },
+                    RedirectUris = { new Uri("https://localhost:9443")}
                 }, cancellationToken);
             }
         }

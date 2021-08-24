@@ -41,6 +41,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "middlerApp.Events", "source
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "middlerApp.SharedModels", "source\middlerApp.SharedModels\middlerApp.SharedModels.csproj", "{E45908A8-64AA-4EF8-9B9D-10C7265C088C}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "middlerApp.Ldap", "source\middlerApp.Ldap\middlerApp.Ldap.csproj", "{F44324A3-0F59-426C-9EEE-EA47D40B94AA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -115,6 +117,10 @@ Global
 		{E45908A8-64AA-4EF8-9B9D-10C7265C088C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E45908A8-64AA-4EF8-9B9D-10C7265C088C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E45908A8-64AA-4EF8-9B9D-10C7265C088C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F44324A3-0F59-426C-9EEE-EA47D40B94AA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F44324A3-0F59-426C-9EEE-EA47D40B94AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F44324A3-0F59-426C-9EEE-EA47D40B94AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F44324A3-0F59-426C-9EEE-EA47D40B94AA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

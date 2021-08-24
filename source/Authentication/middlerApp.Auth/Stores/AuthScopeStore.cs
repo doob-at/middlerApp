@@ -1,5 +1,4 @@
-﻿using OpenIddict.Abstractions;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.ComponentModel;
@@ -17,6 +16,7 @@ using Microsoft.Extensions.Caching.Memory;
 using middlerApp.Auth.Context;
 using middlerApp.Auth.Entities;
 using middlerApp.Auth.ExtensionMethods;
+using OpenIddict.Abstractions;
 
 namespace middlerApp.Auth.Stores
 {

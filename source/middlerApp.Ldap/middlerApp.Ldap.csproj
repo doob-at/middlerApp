@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="doob.Reflectensions.CommonExtensions" Version="6.3.4" />
+    <PackageReference Include="doob.Reflectensions.ExpandableObject" Version="6.3.4" />
+    <PackageReference Include="doob.Reflectensions.Json" Version="6.3.4" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="Scriban" Version="4.0.1" />
+    <PackageReference Include="System.DirectoryServices.Protocols" Version="5.0.0" />
+    <PackageReference Include="TinyCsvParser" Version="2.6.1" />
+  </ItemGroup>
+
+</Project>

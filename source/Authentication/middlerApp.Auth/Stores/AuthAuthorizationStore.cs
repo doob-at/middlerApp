@@ -33,7 +33,7 @@ namespace middlerApp.Auth.Stores
             _dbContext = dbContext;
         }
 
-        private DbSet<AuthApplication> Applications => _dbContext.Set<AuthApplication>();
+        private DbSet<Client> Applications => _dbContext.Set<Client>();
         private DbSet<AuthAuthorization> Authorizations => _dbContext.Set<AuthAuthorization>();
         private DbSet<AuthToken> Tokens => _dbContext.Set<AuthToken>();
 

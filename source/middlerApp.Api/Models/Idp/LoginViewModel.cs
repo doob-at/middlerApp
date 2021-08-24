@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace middlerApp.API.Controllers.IdP.Account
+namespace middlerApp.Api.Models.Idp
 {
     public class LoginViewModel : LoginInputModel
     {

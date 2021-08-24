@@ -1,7 +1,4 @@
-﻿using middlerApp.Auth.Context;
-using middlerApp.Auth.Entities;
-using OpenIddict.Abstractions;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.ComponentModel;
@@ -19,11 +16,14 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Caching.Memory;
+using middlerApp.Auth.Context;
+using middlerApp.Auth.Entities;
 using middlerApp.Auth.ExtensionMethods;
+using OpenIddict.Abstractions;
 
-namespace middlerApp.Auth
+namespace middlerApp.Auth.Stores
 {
-    public class AuthApplicationStore : IOpenIddictApplicationStore<AuthApplication>
+    public class AuthApplicationStore : IOpenIddictApplicationStore<Client>
     {
         private readonly IMemoryCache _cache;
         private readonly AuthDbContext _dbContext;
@@ -36,37 +36,37 @@ namespace middlerApp.Auth
 
         public async ValueTask<long> CountAsync(CancellationToken cancellationToken)
         {
-            return await _dbContext.AuthApplications.AsQueryable().LongCountAsync(cancellationToken);
+            return await _dbContext.Clients.AsQueryable().LongCountAsync(cancellationToken);
         }
 
-        public async ValueTask<long> CountAsync<TResult>(Func<IQueryable<AuthApplication>, IQueryable<TResult>> query, CancellationToken cancellationToken)
+        public async ValueTask<long> CountAsync<TResult>(Func<IQueryable<Client>, IQueryable<TResult>> query, CancellationToken cancellationToken)
         {
             if (query is null)
             {
                 throw new ArgumentNullException(nameof(query));
             }
 
-            return await query(_dbContext.AuthApplications).LongCountAsync(cancellationToken);
+            return await query(_dbContext.Clients).LongCountAsync(cancellationToken);
 
         }
 
-        public async ValueTask CreateAsync(AuthApplication application, CancellationToken cancellationToken)
+        public async ValueTask CreateAsync(Client client, CancellationToken cancellationToken)
         {
-            if (application is null)
+            if (client is null)
             {
-                throw new ArgumentNullException(nameof(application));
+                throw new ArgumentNullException(nameof(client));
             }
 
-            _dbContext.Add(application);
+            _dbContext.Add(client);
 
             await _dbContext.SaveChangesAsync(cancellationToken);
         }
 
-        public async ValueTask DeleteAsync(AuthApplication application, CancellationToken cancellationToken)
+        public async ValueTask DeleteAsync(Client client, CancellationToken cancellationToken)
         {
-            if (application is null)
+            if (client is null)
             {
-                throw new ArgumentNullException(nameof(application));
+                throw new ArgumentNullException(nameof(client));
             }
 
             async ValueTask<IDbContextTransaction?> CreateTransactionAsync()
@@ -99,8 +99,8 @@ namespace middlerApp.Auth
 
             Task<List<AuthAuthorization>> ListAuthorizationsAsync()
                 => (from authorization in _dbContext.AuthAuthorizations.Include(authorization => authorization.Tokens).AsTracking()
-                    join element in _dbContext.AuthApplications.AsTracking() on authorization.Application!.Id equals element.Id
-                    where element.Id!.Equals(application.Id)
+                    join element in _dbContext.Clients.AsTracking() on authorization.Application!.Id equals element.Id
+                    where element.Id!.Equals(client.Id)
                     select authorization).ToListAsync(cancellationToken);
 
             // Note: due to a bug in Entity Framework Core's query visitor, the tokens can't be
@@ -111,8 +111,8 @@ namespace middlerApp.Auth
             Task<List<AuthToken>> ListTokensAsync()
                 => (from token in _dbContext.AuthTokens.AsTracking()
                     where token.Authorization == null
-                    join element in _dbContext.AuthApplications.AsTracking() on token.Application!.Id equals element.Id
-                    where element.Id!.Equals(application.Id)
+                    join element in _dbContext.Clients.AsTracking() on token.Application!.Id equals element.Id
+                    where element.Id!.Equals(client.Id)
                     select token).ToListAsync(cancellationToken);
 
             // To prevent an SQL exception from being thrown if a new associated entity is
@@ -131,14 +131,14 @@ namespace middlerApp.Auth
                 _dbContext.Remove(authorization);
             }
 
-            // Remove all the tokens associated with the application.
+            // Remove all the tokens associated with the client.
             var tokens = await ListTokensAsync();
             foreach (var token in tokens)
             {
                 _dbContext.Remove(token);
             }
 
-            _dbContext.Remove(application);
+            _dbContext.Remove(client);
 
             try
             {
@@ -149,7 +149,7 @@ namespace middlerApp.Auth
             catch (DbUpdateConcurrencyException exception)
             {
                 // Reset the state of the entity to prevents future calls to SaveChangesAsync() from failing.
-                _dbContext.Entry(application).State = EntityState.Unchanged;
+                _dbContext.Entry(client).State = EntityState.Unchanged;
 
                 foreach (var authorization in authorizations)
                 {
@@ -161,24 +161,24 @@ namespace middlerApp.Auth
                     _dbContext.Entry(token).State = EntityState.Unchanged;
                 }
 
-                throw new OpenIddictExceptions.ConcurrencyException("The application was concurrently updated and cannot be persisted in its current state. Reload the application from the database and retry the operation.", exception);
+                throw new OpenIddictExceptions.ConcurrencyException("The client was concurrently updated and cannot be persisted in its current state. Reload the client from the database and retry the operation.", exception);
             }
 
         }
 
-        public async ValueTask<AuthApplication> FindByClientIdAsync(string identifier, CancellationToken cancellationToken)
+        public async ValueTask<Client> FindByClientIdAsync(string identifier, CancellationToken cancellationToken)
         {
             if (string.IsNullOrEmpty(identifier))
             {
                 throw new ArgumentException("The identifier cannot be null or empty.", nameof(identifier));
             }
 
-            return await(from application in _dbContext.AuthApplications.AsTracking()
-                where application.ClientId == identifier
-                select application).FirstOrDefaultAsync(cancellationToken);
+            return await(from client in _dbContext.Clients.Include(x => x.RedirectUris).AsTracking()
+                where client.ClientId == identifier
+                select client).FirstOrDefaultAsync(cancellationToken);
         }
 
-        public async ValueTask<AuthApplication> FindByIdAsync(string identifier, CancellationToken cancellationToken)
+        public async ValueTask<Client> FindByIdAsync(string identifier, CancellationToken cancellationToken)
         {
             if (string.IsNullOrEmpty(identifier))
             {
@@ -187,12 +187,12 @@ namespace middlerApp.Auth
 
             var key = ConvertIdentifierFromString<Guid>(identifier);
 
-            return await(from application in _dbContext.AuthApplications.AsTracking()
-                where application.Id!.Equals(key)
-                select application).FirstOrDefaultAsync(cancellationToken);
+            return await(from client in _dbContext.Clients.Include(x => x.RedirectUris).AsTracking()
+                where client.Id!.Equals(key)
+                select client).FirstOrDefaultAsync(cancellationToken);
         }
 
-        public IAsyncEnumerable<AuthApplication> FindByPostLogoutRedirectUriAsync(string address, CancellationToken cancellationToken)
+        public IAsyncEnumerable<Client> FindByPostLogoutRedirectUriAsync(string address, CancellationToken cancellationToken)
         {
             if (string.IsNullOrEmpty(address))
             {
@@ -207,24 +207,24 @@ namespace middlerApp.Auth
 
             return ExecuteAsync(cancellationToken);
 
-            async IAsyncEnumerable<AuthApplication> ExecuteAsync([EnumeratorCancellation] CancellationToken cancellationToken)
+            async IAsyncEnumerable<Client> ExecuteAsync([EnumeratorCancellation] CancellationToken cancellationToken)
             {
-                var applications = (from application in _dbContext.AuthApplications.AsTracking()
-                    where application.PostLogoutRedirectUris!.Contains(address)
-                    select application).AsAsyncEnumerable(cancellationToken);
+                var applications = (from client in _dbContext.Clients.Include(x => x.RedirectUris).AsTracking()
+                    where client.PostLogoutRedirectUris.Any(r => r.PostLogoutRedirectUri == address)//.Contains(address)
+                    select client).AsAsyncEnumerable(cancellationToken);
 
-                await foreach (var application in applications)
+                await foreach (var client in applications)
                 {
-                    var addresses = await GetPostLogoutRedirectUrisAsync(application, cancellationToken);
+                    var addresses = await GetPostLogoutRedirectUrisAsync(client, cancellationToken);
                     if (addresses.Contains(address, StringComparer.Ordinal))
                     {
-                        yield return application;
+                        yield return client;
                     }
                 }
             }
         }
 
-        public IAsyncEnumerable<AuthApplication> FindByRedirectUriAsync(string address, CancellationToken cancellationToken)
+        public IAsyncEnumerable<Client> FindByRedirectUriAsync(string address, CancellationToken cancellationToken)
         {
             if (string.IsNullOrEmpty(address))
             {
@@ -239,104 +239,105 @@ namespace middlerApp.Auth
 
             return ExecuteAsync(cancellationToken);
 
-            async IAsyncEnumerable<AuthApplication> ExecuteAsync([EnumeratorCancellation] CancellationToken cancellationToken)
+            async IAsyncEnumerable<Client> ExecuteAsync([EnumeratorCancellation] CancellationToken cancellationToken)
             {
-                var applications = (from application in _dbContext.AuthApplications.AsTracking()
-                    where application.RedirectUris!.Contains(address)
-                    select application).AsAsyncEnumerable(cancellationToken);
+                ///TODO: Collection
+                var applications = (from client in _dbContext.Clients.Include(x => x.RedirectUris).AsTracking()
+                    where client.RedirectUris.Any(r => r.RedirectUri == address) //.Contains(address)
+                    select client).AsAsyncEnumerable(cancellationToken);
 
-                await foreach (var application in applications)
+                await foreach (var client in applications)
                 {
-                    var addresses = await GetRedirectUrisAsync(application, cancellationToken);
+                    var addresses = await GetRedirectUrisAsync(client, cancellationToken);
                     if (addresses.Contains(address, StringComparer.Ordinal))
                     {
-                        yield return application;
+                        yield return client;
                     }
                 }
             }
         }
 
-        public async ValueTask<TResult> GetAsync<TState, TResult>(Func<IQueryable<AuthApplication>, TState, IQueryable<TResult>> query, TState state, CancellationToken cancellationToken)
+        public async ValueTask<TResult> GetAsync<TState, TResult>(Func<IQueryable<Client>, TState, IQueryable<TResult>> query, TState state, CancellationToken cancellationToken)
         {
             if (query is null)
             {
                 throw new ArgumentNullException(nameof(query));
             }
 
-            return await query(_dbContext.AuthApplications.AsTracking(), state).FirstOrDefaultAsync(cancellationToken);
+            return await query(_dbContext.Clients.Include(x => x.RedirectUris).AsTracking(), state).FirstOrDefaultAsync(cancellationToken);
         }
 
-        public ValueTask<string> GetClientIdAsync(AuthApplication application, CancellationToken cancellationToken)
+        public ValueTask<string> GetClientIdAsync(Client client, CancellationToken cancellationToken)
         {
-            if (application is null)
+            if (client is null)
             {
-                throw new ArgumentNullException(nameof(application));
+                throw new ArgumentNullException(nameof(client));
             }
 
-            return new ValueTask<string?>(application.ClientId);
+            return new ValueTask<string?>(client.ClientId);
         }
 
-        public ValueTask<string> GetClientSecretAsync(AuthApplication application, CancellationToken cancellationToken)
+        public ValueTask<string> GetClientSecretAsync(Client client, CancellationToken cancellationToken)
         {
-            if (application is null)
+            if (client is null)
             {
-                throw new ArgumentNullException(nameof(application));
+                throw new ArgumentNullException(nameof(client));
             }
 
-            return new ValueTask<string?>(application.ClientSecret);
+            return new ValueTask<string?>(client.ClientSecret);
         }
 
-        public ValueTask<string> GetClientTypeAsync(AuthApplication application, CancellationToken cancellationToken)
+        public ValueTask<string> GetClientTypeAsync(Client client, CancellationToken cancellationToken)
         {
-            if (application is null)
+            if (client is null)
             {
-                throw new ArgumentNullException(nameof(application));
+                throw new ArgumentNullException(nameof(client));
             }
 
-            return new ValueTask<string?>(application.Type);
+            return new ValueTask<string?>(client.Type);
         }
 
-        public ValueTask<string> GetConsentTypeAsync(AuthApplication application, CancellationToken cancellationToken)
+        public ValueTask<string> GetConsentTypeAsync(Client client, CancellationToken cancellationToken)
         {
-            if (application is null)
+            if (client is null)
             {
-                throw new ArgumentNullException(nameof(application));
+                throw new ArgumentNullException(nameof(client));
             }
 
-            return new ValueTask<string?>(application.ConsentType);
+            return new ValueTask<string?>(client.ConsentType);
         }
 
-        public ValueTask<string> GetDisplayNameAsync(AuthApplication application, CancellationToken cancellationToken)
+        public ValueTask<string> GetDisplayNameAsync(Client client, CancellationToken cancellationToken)
         {
-            if (application is null)
+            if (client is null)
             {
-                throw new ArgumentNullException(nameof(application));
+                throw new ArgumentNullException(nameof(client));
             }
 
-            return new ValueTask<string?>(application.DisplayName);
+            return new ValueTask<string?>(client.DisplayName);
         }
 
-        public ValueTask<ImmutableDictionary<CultureInfo, string>> GetDisplayNamesAsync(AuthApplication application, CancellationToken cancellationToken)
+        public ValueTask<ImmutableDictionary<CultureInfo, string>> GetDisplayNamesAsync(Client client, CancellationToken cancellationToken)
         {
-            if (application is null)
+            if (client is null)
             {
-                throw new ArgumentNullException(nameof(application));
+                throw new ArgumentNullException(nameof(client));
             }
 
-            if (string.IsNullOrEmpty(application.DisplayNames))
+            if (string.IsNullOrEmpty(client.DisplayNames))
             {
                 return new ValueTask<ImmutableDictionary<CultureInfo, string>>(ImmutableDictionary.Create<CultureInfo, string>());
             }
 
             // Note: parsing the stringified display names is an expensive operation.
             // To mitigate that, the resulting object is stored in the memory cache.
-            var key = string.Concat("7762c378-c113-4564-b14b-1402b3949aaa", "\x1e", application.DisplayNames);
+            var key = string.Concat("7762c378-c113-4564-b14b-1402b3949aaa", "\x1e", client.DisplayNames);
             var names = _cache.GetOrCreate(key, entry =>
             {
                 entry.SetPriority(CacheItemPriority.High)
                     .SetSlidingExpiration(TimeSpan.FromMinutes(1));
 
-                using var document = JsonDocument.Parse(application.DisplayNames);
+                using var document = JsonDocument.Parse(client.DisplayNames);
                 var builder = ImmutableDictionary.CreateBuilder<CultureInfo, string>();
 
                 foreach (var property in document.RootElement.EnumerateObject())
@@ -356,37 +357,37 @@ namespace middlerApp.Auth
             return new ValueTask<ImmutableDictionary<CultureInfo, string>>(names);
         }
 
-        public ValueTask<string> GetIdAsync(AuthApplication application, CancellationToken cancellationToken)
+        public ValueTask<string> GetIdAsync(Client client, CancellationToken cancellationToken)
         {
-            if (application is null)
+            if (client is null)
             {
-                throw new ArgumentNullException(nameof(application));
+                throw new ArgumentNullException(nameof(client));
             }
 
-            return new ValueTask<string?>(ConvertIdentifierToString(application.Id));
+            return new ValueTask<string?>(ConvertIdentifierToString(client.Id));
         }
 
-        public ValueTask<ImmutableArray<string>> GetPermissionsAsync(AuthApplication application, CancellationToken cancellationToken)
+        public ValueTask<ImmutableArray<string>> GetPermissionsAsync(Client client, CancellationToken cancellationToken)
         {
-            if (application is null)
+            if (client is null)
             {
-                throw new ArgumentNullException(nameof(application));
+                throw new ArgumentNullException(nameof(client));
             }
 
-            if (string.IsNullOrEmpty(application.Permissions))
+            if (string.IsNullOrEmpty(client.Permissions))
             {
                 return new ValueTask<ImmutableArray<string>>(ImmutableArray.Create<string>());
             }
 
             // Note: parsing the stringified permissions is an expensive operation.
             // To mitigate that, the resulting array is stored in the memory cache.
-            var key = string.Concat("0347e0aa-3a26-410a-97e8-a83bdeb21a1f", "\x1e", application.Permissions);
+            var key = string.Concat("0347e0aa-3a26-410a-97e8-a83bdeb21a1f", "\x1e", client.Permissions);
             var permissions = _cache.GetOrCreate(key, entry =>
             {
                 entry.SetPriority(CacheItemPriority.High)
                     .SetSlidingExpiration(TimeSpan.FromMinutes(1));
 
-                using var document = JsonDocument.Parse(application.Permissions);
+                using var document = JsonDocument.Parse(client.Permissions);
                 var builder = ImmutableArray.CreateBuilder<string>(document.RootElement.GetArrayLength());
 
                 foreach (var element in document.RootElement.EnumerateArray())
@@ -406,67 +407,67 @@ namespace middlerApp.Auth
             return new ValueTask<ImmutableArray<string>>(permissions);
         }
 
-        public ValueTask<ImmutableArray<string>> GetPostLogoutRedirectUrisAsync(AuthApplication application, CancellationToken cancellationToken)
+        public ValueTask<ImmutableArray<string>> GetPostLogoutRedirectUrisAsync(Client client, CancellationToken cancellationToken)
         {
-            if (application is null)
+            if (client is null)
             {
-                throw new ArgumentNullException(nameof(application));
+                throw new ArgumentNullException(nameof(client));
             }
 
-            if (string.IsNullOrEmpty(application.PostLogoutRedirectUris))
+            if (!client.PostLogoutRedirectUris.Any())
             {
                 return new ValueTask<ImmutableArray<string>>(ImmutableArray.Create<string>());
             }
 
             // Note: parsing the stringified addresses is an expensive operation.
             // To mitigate that, the resulting array is stored in the memory cache.
-            var key = string.Concat("fb14dfb9-9216-4b77-bfa9-7e85f8201ff4", "\x1e", application.PostLogoutRedirectUris);
+            var key = string.Concat("fb14dfb9-9216-4b77-bfa9-7e85f8201ff4", "\x1e", client.PostLogoutRedirectUris);
             var addresses = _cache.GetOrCreate(key, entry =>
             {
                 entry.SetPriority(CacheItemPriority.High)
                     .SetSlidingExpiration(TimeSpan.FromMinutes(1));
 
-                using var document = JsonDocument.Parse(application.PostLogoutRedirectUris);
-                var builder = ImmutableArray.CreateBuilder<string>(document.RootElement.GetArrayLength());
+                //using var document = JsonDocument.Parse(client.PostLogoutRedirectUris);
+                //var builder = ImmutableArray.CreateBuilder<string>(document.RootElement.GetArrayLength());
 
-                foreach (var element in document.RootElement.EnumerateArray())
-                {
-                    var value = element.GetString();
-                    if (string.IsNullOrEmpty(value))
-                    {
-                        continue;
-                    }
+                //foreach (var element in document.RootElement.EnumerateArray())
+                //{
+                //    var value = element.GetString();
+                //    if (string.IsNullOrEmpty(value))
+                //    {
+                //        continue;
+                //    }
 
-                    builder.Add(value);
-                }
+                //    builder.Add(value);
+                //}
 
-                return builder.ToImmutable();
+                return client.PostLogoutRedirectUris.Select(r => r.PostLogoutRedirectUri).ToImmutableArray();
             });
 
             return new ValueTask<ImmutableArray<string>>(addresses);
         }
 
-        public ValueTask<ImmutableDictionary<string, JsonElement>> GetPropertiesAsync(AuthApplication application, CancellationToken cancellationToken)
+        public ValueTask<ImmutableDictionary<string, JsonElement>> GetPropertiesAsync(Client client, CancellationToken cancellationToken)
         {
-            if (application is null)
+            if (client is null)
             {
-                throw new ArgumentNullException(nameof(application));
+                throw new ArgumentNullException(nameof(client));
             }
 
-            if (string.IsNullOrEmpty(application.Properties))
+            if (string.IsNullOrEmpty(client.Properties))
             {
                 return new ValueTask<ImmutableDictionary<string, JsonElement>>(ImmutableDictionary.Create<string, JsonElement>());
             }
 
             // Note: parsing the stringified properties is an expensive operation.
             // To mitigate that, the resulting object is stored in the memory cache.
-            var key = string.Concat("2e3e9680-5654-48d8-a27d-b8bb4f0f1d50", "\x1e", application.Properties);
+            var key = string.Concat("2e3e9680-5654-48d8-a27d-b8bb4f0f1d50", "\x1e", client.Properties);
             var properties = _cache.GetOrCreate(key, entry =>
             {
                 entry.SetPriority(CacheItemPriority.High)
                     .SetSlidingExpiration(TimeSpan.FromMinutes(1));
 
-                using var document = JsonDocument.Parse(application.Properties);
+                using var document = JsonDocument.Parse(client.Properties);
                 var builder = ImmutableDictionary.CreateBuilder<string, JsonElement>();
 
                 foreach (var property in document.RootElement.EnumerateObject())
@@ -480,67 +481,69 @@ namespace middlerApp.Auth
             return new ValueTask<ImmutableDictionary<string, JsonElement>>(properties);
         }
 
-        public ValueTask<ImmutableArray<string>> GetRedirectUrisAsync(AuthApplication application, CancellationToken cancellationToken)
+        public ValueTask<ImmutableArray<string>> GetRedirectUrisAsync(Client client, CancellationToken cancellationToken)
         {
-            if (application is null)
+            if (client is null)
             {
-                throw new ArgumentNullException(nameof(application));
+                throw new ArgumentNullException(nameof(client));
             }
 
-            if (string.IsNullOrEmpty(application.RedirectUris))
+            if (!client.RedirectUris.Any())
             {
                 return new ValueTask<ImmutableArray<string>>(ImmutableArray.Create<string>());
             }
 
             // Note: parsing the stringified addresses is an expensive operation.
             // To mitigate that, the resulting array is stored in the memory cache.
-            var key = string.Concat("851d6f08-2ee0-4452-bbe5-ab864611ecaa", "\x1e", application.RedirectUris);
+            var key = string.Concat("851d6f08-2ee0-4452-bbe5-ab864611ecaa", "\x1e", client.RedirectUris);
             var addresses = _cache.GetOrCreate(key, entry =>
             {
                 entry.SetPriority(CacheItemPriority.High)
                     .SetSlidingExpiration(TimeSpan.FromMinutes(1));
 
-                using var document = JsonDocument.Parse(application.RedirectUris);
-                var builder = ImmutableArray.CreateBuilder<string>(document.RootElement.GetArrayLength());
+                //using var document = JsonDocument.Parse(client.RedirectUris);
+                //var builder = ImmutableArray.CreateBuilder<string>(document.RootElement.GetArrayLength());
 
-                foreach (var element in document.RootElement.EnumerateArray())
-                {
-                    var value = element.GetString();
-                    if (string.IsNullOrEmpty(value))
-                    {
-                        continue;
-                    }
+                //foreach (var element in document.RootElement.EnumerateArray())
+                //{
+                //    var value = element.GetString();
+                //    if (string.IsNullOrEmpty(value))
+                //    {
+                //        continue;
+                //    }
 
-                    builder.Add(value);
-                }
+                //    builder.Add(value);
+                //}
 
-                return builder.ToImmutable();
+                //return builder.ToImmutable();
+
+                return client.RedirectUris.Select(r => r.RedirectUri).ToImmutableArray();
             });
 
             return new ValueTask<ImmutableArray<string>>(addresses);
         }
 
-        public ValueTask<ImmutableArray<string>> GetRequirementsAsync(AuthApplication application, CancellationToken cancellationToken)
+        public ValueTask<ImmutableArray<string>> GetRequirementsAsync(Client client, CancellationToken cancellationToken)
         {
-            if (application is null)
+            if (client is null)
             {
-                throw new ArgumentNullException(nameof(application));
+                throw new ArgumentNullException(nameof(client));
             }
 
-            if (string.IsNullOrEmpty(application.Requirements))
+            if (string.IsNullOrEmpty(client.Requirements))
             {
                 return new ValueTask<ImmutableArray<string>>(ImmutableArray.Create<string>());
             }
 
             // Note: parsing the stringified requirements is an expensive operation.
             // To mitigate that, the resulting array is stored in the memory cache.
-            var key = string.Concat("b4808a89-8969-4512-895f-a909c62a8995", "\x1e", application.Requirements);
+            var key = string.Concat("b4808a89-8969-4512-895f-a909c62a8995", "\x1e", client.Requirements);
             var requirements = _cache.GetOrCreate(key, entry =>
             {
                 entry.SetPriority(CacheItemPriority.High)
                     .SetSlidingExpiration(TimeSpan.FromMinutes(1));
 
-                using var document = JsonDocument.Parse(application.Requirements);
+                using var document = JsonDocument.Parse(client.Requirements);
                 var builder = ImmutableArray.CreateBuilder<string>(document.RootElement.GetArrayLength());
 
                 foreach (var element in document.RootElement.EnumerateArray())
@@ -560,23 +563,23 @@ namespace middlerApp.Auth
             return new ValueTask<ImmutableArray<string>>(requirements);
         }
 
-        public ValueTask<AuthApplication> InstantiateAsync(CancellationToken cancellationToken)
+        public ValueTask<Client> InstantiateAsync(CancellationToken cancellationToken)
         {
             try
             {
-                return new ValueTask<AuthApplication>(Activator.CreateInstance<AuthApplication>());
+                return new ValueTask<Client>(Activator.CreateInstance<Client>());
             }
 
             catch (MemberAccessException exception)
             {
-                return new ValueTask<AuthApplication>(Task.FromException<AuthApplication>(
-                    new InvalidOperationException("An error occurred while trying to create a new application instance. Make sure that the application entity is not abstract and has a public parameterless constructor or create a custom application store that overrides 'InstantiateAsync()' to use a custom factory.", exception)));
+                return new ValueTask<Client>(Task.FromException<Client>(
+                    new InvalidOperationException("An error occurred while trying to create a new client instance. Make sure that the client entity is not abstract and has a public parameterless constructor or create a custom client store that overrides 'InstantiateAsync()' to use a custom factory.", exception)));
             }
         }
 
-        public IAsyncEnumerable<AuthApplication> ListAsync(int? count, int? offset, CancellationToken cancellationToken)
+        public IAsyncEnumerable<Client> ListAsync(int? count, int? offset, CancellationToken cancellationToken)
         {
-            var query = _dbContext.AuthApplications.AsQueryable().OrderBy(application => application.Id!).AsTracking();
+            var query = _dbContext.Clients.Include(x => x.RedirectUris).AsQueryable().OrderBy(client => client.Id!).AsTracking();
 
             if (offset.HasValue)
             {
@@ -591,86 +594,86 @@ namespace middlerApp.Auth
             return query.AsAsyncEnumerable(cancellationToken);
         }
 
-        public IAsyncEnumerable<TResult> ListAsync<TState, TResult>(Func<IQueryable<AuthApplication>, TState, IQueryable<TResult>> query, TState state, CancellationToken cancellationToken)
+        public IAsyncEnumerable<TResult> ListAsync<TState, TResult>(Func<IQueryable<Client>, TState, IQueryable<TResult>> query, TState state, CancellationToken cancellationToken)
         {
             if (query is null)
             {
                 throw new ArgumentNullException(nameof(query));
             }
 
-            return query(_dbContext.AuthApplications.AsTracking(), state).AsAsyncEnumerable(cancellationToken);
+            return query(_dbContext.Clients.Include(x => x.RedirectUris).AsTracking(), state).AsAsyncEnumerable(cancellationToken);
         }
 
-        public ValueTask SetClientIdAsync(AuthApplication application, string identifier, CancellationToken cancellationToken)
+        public ValueTask SetClientIdAsync(Client client, string identifier, CancellationToken cancellationToken)
         {
-            if (application is null)
+            if (client is null)
             {
-                throw new ArgumentNullException(nameof(application));
+                throw new ArgumentNullException(nameof(client));
             }
 
-            application.ClientId = identifier;
+            client.ClientId = identifier;
 
             return default;
         }
 
-        public ValueTask SetClientSecretAsync(AuthApplication application, string secret, CancellationToken cancellationToken)
+        public ValueTask SetClientSecretAsync(Client client, string secret, CancellationToken cancellationToken)
         {
-            if (application is null)
+            if (client is null)
             {
-                throw new ArgumentNullException(nameof(application));
+                throw new ArgumentNullException(nameof(client));
             }
 
-            application.ClientSecret = secret;
+            client.ClientSecret = secret;
 
             return default;
         }
 
-        public ValueTask SetClientTypeAsync(AuthApplication application, string type, CancellationToken cancellationToken)
+        public ValueTask SetClientTypeAsync(Client client, string type, CancellationToken cancellationToken)
         {
-            if (application is null)
+            if (client is null)
             {
-                throw new ArgumentNullException(nameof(application));
+                throw new ArgumentNullException(nameof(client));
             }
 
-            application.Type = type;
+            client.Type = type;
 
             return default;
         }
 
-        public ValueTask SetConsentTypeAsync(AuthApplication application, string type, CancellationToken cancellationToken)
+        public ValueTask SetConsentTypeAsync(Client client, string type, CancellationToken cancellationToken)
         {
-            if (application is null)
+            if (client is null)
             {
-                throw new ArgumentNullException(nameof(application));
+                throw new ArgumentNullException(nameof(client));
             }
 
-            application.ConsentType = type;
+            client.ConsentType = type;
 
             return default;
         }
 
-        public ValueTask SetDisplayNameAsync(AuthApplication application, string name, CancellationToken cancellationToken)
+        public ValueTask SetDisplayNameAsync(Client client, string name, CancellationToken cancellationToken)
         {
-            if (application is null)
+            if (client is null)
             {
-                throw new ArgumentNullException(nameof(application));
+                throw new ArgumentNullException(nameof(client));
             }
 
-            application.DisplayName = name;
+            client.DisplayName = name;
 
             return default;
         }
 
-        public ValueTask SetDisplayNamesAsync(AuthApplication application, ImmutableDictionary<CultureInfo, string> names, CancellationToken cancellationToken)
+        public ValueTask SetDisplayNamesAsync(Client client, ImmutableDictionary<CultureInfo, string> names, CancellationToken cancellationToken)
         {
-            if (application is null)
+            if (client is null)
             {
-                throw new ArgumentNullException(nameof(application));
+                throw new ArgumentNullException(nameof(client));
             }
 
             if (names is null || names.IsEmpty)
             {
-                application.DisplayNames = null;
+                client.DisplayNames = null;
 
                 return default;
             }
@@ -693,21 +696,21 @@ namespace middlerApp.Auth
             writer.WriteEndObject();
             writer.Flush();
 
-            application.DisplayNames = Encoding.UTF8.GetString(stream.ToArray());
+            client.DisplayNames = Encoding.UTF8.GetString(stream.ToArray());
 
             return default;
         }
 
-        public ValueTask SetPermissionsAsync(AuthApplication application, ImmutableArray<string> permissions, CancellationToken cancellationToken)
+        public ValueTask SetPermissionsAsync(Client client, ImmutableArray<string> permissions, CancellationToken cancellationToken)
         {
-            if (application is null)
+            if (client is null)
             {
-                throw new ArgumentNullException(nameof(application));
+                throw new ArgumentNullException(nameof(client));
             }
 
             if (permissions.IsDefaultOrEmpty)
             {
-                application.Permissions = null;
+                client.Permissions = null;
 
                 return default;
             }
@@ -729,57 +732,45 @@ namespace middlerApp.Auth
             writer.WriteEndArray();
             writer.Flush();
 
-            application.Permissions = Encoding.UTF8.GetString(stream.ToArray());
+            client.Permissions = Encoding.UTF8.GetString(stream.ToArray());
 
             return default;
         }
 
-        public ValueTask SetPostLogoutRedirectUrisAsync(AuthApplication application, ImmutableArray<string> addresses, CancellationToken cancellationToken)
+        public ValueTask SetPostLogoutRedirectUrisAsync(Client client, ImmutableArray<string> addresses, CancellationToken cancellationToken)
         {
-            if (application is null)
+            if (client is null)
             {
-                throw new ArgumentNullException(nameof(application));
+                throw new ArgumentNullException(nameof(client));
             }
 
             if (addresses.IsDefaultOrEmpty)
             {
-                application.PostLogoutRedirectUris = null;
+                client.PostLogoutRedirectUris = null;
 
                 return default;
             }
 
-            using var stream = new MemoryStream();
-            using var writer = new Utf8JsonWriter(stream, new JsonWriterOptions
+            client.PostLogoutRedirectUris = addresses.Select(a => new ClientPostLogoutRedirectUri()
             {
-                Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
-                Indented = false
-            });
+                Client = client,
+                PostLogoutRedirectUri = a
+            }).ToList();
 
-            writer.WriteStartArray();
-
-            foreach (var address in addresses)
-            {
-                writer.WriteStringValue(address);
-            }
-
-            writer.WriteEndArray();
-            writer.Flush();
-
-            application.PostLogoutRedirectUris = Encoding.UTF8.GetString(stream.ToArray());
-
+           
             return default;
         }
 
-        public ValueTask SetPropertiesAsync(AuthApplication application, ImmutableDictionary<string, JsonElement> properties, CancellationToken cancellationToken)
+        public ValueTask SetPropertiesAsync(Client client, ImmutableDictionary<string, JsonElement> properties, CancellationToken cancellationToken)
         {
-            if (application is null)
+            if (client is null)
             {
-                throw new ArgumentNullException(nameof(application));
+                throw new ArgumentNullException(nameof(client));
             }
 
             if (properties is null || properties.IsEmpty)
             {
-                application.Properties = null;
+                client.Properties = null;
 
                 return default;
             }
@@ -802,57 +793,62 @@ namespace middlerApp.Auth
             writer.WriteEndObject();
             writer.Flush();
 
-            application.Properties = Encoding.UTF8.GetString(stream.ToArray());
+            client.Properties = Encoding.UTF8.GetString(stream.ToArray());
 
             return default;
         }
 
-        public ValueTask SetRedirectUrisAsync(AuthApplication application, ImmutableArray<string> addresses, CancellationToken cancellationToken)
+        public ValueTask SetRedirectUrisAsync(Client client, ImmutableArray<string> addresses, CancellationToken cancellationToken)
         {
-            if (application is null)
+            if (client is null)
             {
-                throw new ArgumentNullException(nameof(application));
+                throw new ArgumentNullException(nameof(client));
             }
 
             if (addresses.IsDefaultOrEmpty)
             {
-                application.RedirectUris = null;
+                client.RedirectUris = null;
 
                 return default;
             }
 
-            using var stream = new MemoryStream();
-            using var writer = new Utf8JsonWriter(stream, new JsonWriterOptions
+            client.RedirectUris = addresses.Select(a => new ClientRedirectUri()
             {
-                Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
-                Indented = false
-            });
+                Client = client,
+                RedirectUri = a
+            }).ToList();
+            //using var stream = new MemoryStream();
+            //using var writer = new Utf8JsonWriter(stream, new JsonWriterOptions
+            //{
+            //    Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+            //    Indented = false
+            //});
 
-            writer.WriteStartArray();
+            //writer.WriteStartArray();
 
-            foreach (var address in addresses)
-            {
-                writer.WriteStringValue(address);
-            }
+            //foreach (var address in addresses)
+            //{
+            //    writer.WriteStringValue(address);
+            //}
 
-            writer.WriteEndArray();
-            writer.Flush();
+            //writer.WriteEndArray();
+            //writer.Flush();
 
-            application.RedirectUris = Encoding.UTF8.GetString(stream.ToArray());
+            //client.RedirectUris = Encoding.UTF8.GetString(stream.ToArray());
 
             return default;
         }
 
-        public ValueTask SetRequirementsAsync(AuthApplication application, ImmutableArray<string> requirements, CancellationToken cancellationToken)
+        public ValueTask SetRequirementsAsync(Client client, ImmutableArray<string> requirements, CancellationToken cancellationToken)
         {
-            if (application is null)
+            if (client is null)
             {
-                throw new ArgumentNullException(nameof(application));
+                throw new ArgumentNullException(nameof(client));
             }
 
             if (requirements.IsDefaultOrEmpty)
             {
-                application.Requirements = null;
+                client.Requirements = null;
 
                 return default;
             }
@@ -874,25 +870,25 @@ namespace middlerApp.Auth
             writer.WriteEndArray();
             writer.Flush();
 
-            application.Requirements = Encoding.UTF8.GetString(stream.ToArray());
+            client.Requirements = Encoding.UTF8.GetString(stream.ToArray());
 
             return default;
         }
 
-        public async ValueTask UpdateAsync(AuthApplication application, CancellationToken cancellationToken)
+        public async ValueTask UpdateAsync(Client client, CancellationToken cancellationToken)
         {
-            if (application is null)
+            if (client is null)
             {
-                throw new ArgumentNullException(nameof(application));
+                throw new ArgumentNullException(nameof(client));
             }
 
-            _dbContext.Attach(application);
+            _dbContext.Attach(client);
 
             // Generate a new concurrency token and attach it
-            // to the application before persisting the changes.
-            application.ConcurrencyToken = Guid.NewGuid().ToString();
+            // to the client before persisting the changes.
+            client.ConcurrencyToken = Guid.NewGuid().ToString();
 
-            _dbContext.Update(application);
+            _dbContext.Update(client);
 
             try
             {
@@ -902,9 +898,9 @@ namespace middlerApp.Auth
             catch (DbUpdateConcurrencyException exception)
             {
                 // Reset the state of the entity to prevents future calls to SaveChangesAsync() from failing.
-                _dbContext.Entry(application).State = EntityState.Unchanged;
+                _dbContext.Entry(client).State = EntityState.Unchanged;
 
-                throw new OpenIddictExceptions.ConcurrencyException("The application was concurrently updated and cannot be persisted in its current state. Reload the application from the database and retry the operation.", exception);
+                throw new OpenIddictExceptions.ConcurrencyException("The client was concurrently updated and cannot be persisted in its current state. Reload the client from the database and retry the operation.", exception);
             }
         }
 

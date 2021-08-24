@@ -10,7 +10,8 @@ using Microsoft.AspNetCore.Authentication.Negotiate;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using middlerApp.Api.Attributes;
-using middlerApp.API.Helper;
+using middlerApp.Api.Helper;
+using middlerApp.Api.Models.Idp;
 using OpenIddict.Abstractions;
 using OpenIddict.Server.AspNetCore;
 
@@ -138,7 +139,7 @@ namespace middlerApp.Api.Controllers.Auth
 
         private async Task<LoginViewModel> BuildLoginViewModelAsync(string returnUrl)
         {
-
+            return null;
         }
     }
 }
