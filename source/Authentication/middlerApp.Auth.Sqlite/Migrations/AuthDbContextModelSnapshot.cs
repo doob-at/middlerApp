@@ -16,65 +16,19 @@ namespace middlerApp.Auth.Sqlite.Migrations
             modelBuilder
                 .HasAnnotation("ProductVersion", "5.0.7");
 
-            modelBuilder.Entity("middlerApp.Auth.Entities.AuthApplication", b =>
+            modelBuilder.Entity("MRoleMUser", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<Guid>("RolesId")
                         .HasColumnType("TEXT");
 
-                    b.Property<int?>("AccessTokenLifeTime")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("ClientId")
-                        .HasMaxLength(100)
+                    b.Property<Guid>("UsersId")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("ClientSecret")
-                        .HasColumnType("TEXT");
+                    b.HasKey("RolesId", "UsersId");
 
-                    b.Property<string>("ConcurrencyToken")
-                        .IsConcurrencyToken()
-                        .HasMaxLength(50)
-                        .HasColumnType("TEXT");
+                    b.HasIndex("UsersId");
 
-                    b.Property<string>("ConsentType")
-                        .HasMaxLength(50)
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("DisplayName")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("DisplayNames")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Permissions")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("PostLogoutRedirectUris")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Properties")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("RedirectUris")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int?>("RefreshTokenLifeTime")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Requirements")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Type")
-                        .HasMaxLength(50)
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ClientId")
-                        .IsUnique();
-
-                    b.ToTable("AuthApplications");
+                    b.ToTable("MRoleMUser");
                 });
 
             modelBuilder.Entity("middlerApp.Auth.Entities.AuthAuthorization", b =>
@@ -87,8 +41,6 @@ namespace middlerApp.Auth.Sqlite.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("ConcurrencyToken")
-                        .IsConcurrencyToken()
-                        .HasMaxLength(50)
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime?>("CreationDate")
@@ -101,20 +53,17 @@ namespace middlerApp.Auth.Sqlite.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Status")
-                        .HasMaxLength(50)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Subject")
-                        .HasMaxLength(400)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Type")
-                        .HasMaxLength(50)
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ApplicationId", "Status", "Subject", "Type");
+                    b.HasIndex("ApplicationId");
 
                     b.ToTable("AuthAuthorizations");
                 });
@@ -126,8 +75,6 @@ namespace middlerApp.Auth.Sqlite.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("ConcurrencyToken")
-                        .IsConcurrencyToken()
-                        .HasMaxLength(50)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Description")
@@ -143,7 +90,6 @@ namespace middlerApp.Auth.Sqlite.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
-                        .HasMaxLength(200)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Properties")
@@ -153,9 +99,6 @@ namespace middlerApp.Auth.Sqlite.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("Name")
-                        .IsUnique();
 
                     b.ToTable("AuthScopes");
                 });
@@ -173,8 +116,6 @@ namespace middlerApp.Auth.Sqlite.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("ConcurrencyToken")
-                        .IsConcurrencyToken()
-                        .HasMaxLength(50)
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime?>("CreationDate")
@@ -193,36 +134,366 @@ namespace middlerApp.Auth.Sqlite.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("ReferenceId")
-                        .HasMaxLength(100)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Status")
-                        .HasMaxLength(50)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Subject")
-                        .HasMaxLength(400)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Type")
-                        .HasMaxLength(50)
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("ApplicationId");
+
                     b.HasIndex("AuthorizationId");
-
-                    b.HasIndex("ReferenceId")
-                        .IsUnique();
-
-                    b.HasIndex("ApplicationId", "Status", "Subject", "Type");
 
                     b.ToTable("AuthTokens");
                 });
 
+            modelBuilder.Entity("middlerApp.Auth.Entities.AuthenticationProvider", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("DisplayName")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("Enabled")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Parameters")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Type")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("AuthenticationProviders");
+                });
+
+            modelBuilder.Entity("middlerApp.Auth.Entities.Client", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("AccessTokenLifeTime")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ClientId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ClientSecret")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ConcurrencyToken")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ConsentType")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("DisplayName")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("DisplayNames")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Permissions")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Properties")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("RefreshTokenLifeTime")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Requirements")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Type")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Clients");
+                });
+
+            modelBuilder.Entity("middlerApp.Auth.Entities.ClientPostLogoutRedirectUri", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("ClientId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PostLogoutRedirectUri")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClientId");
+
+                    b.ToTable("ClientPostLogoutRedirectUri");
+                });
+
+            modelBuilder.Entity("middlerApp.Auth.Entities.ClientRedirectUri", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("ClientId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("RedirectUri")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClientId");
+
+                    b.ToTable("ClientRedirectUri");
+                });
+
+            modelBuilder.Entity("middlerApp.Auth.Entities.MExternalClaim", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Issuer")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Value")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ExternalClaims");
+                });
+
+            modelBuilder.Entity("middlerApp.Auth.Entities.MRole", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("BuiltIn")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("DisplayName")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Roles");
+                });
+
+            modelBuilder.Entity("middlerApp.Auth.Entities.MUser", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("Active")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("EmailConfirmed")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("ExpiresOn")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("FirstName")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("LastName")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("LockoutEnabled")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Password")
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("PhoneNumberConfirmed")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("SecurityCode")
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("SecurityCodeExpirationDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Subject")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("TwoFactorEnabled")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("UserName")
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("middlerApp.Auth.Entities.MUserClaim", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Value")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserClaims");
+                });
+
+            modelBuilder.Entity("middlerApp.Auth.Entities.MUserLogin", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Provider")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ProviderIdentityKey")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserLogins");
+                });
+
+            modelBuilder.Entity("middlerApp.Auth.Entities.MUserSecret", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Secret")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserSecrets");
+                });
+
+            modelBuilder.Entity("MRoleMUser", b =>
+                {
+                    b.HasOne("middlerApp.Auth.Entities.MRole", null)
+                        .WithMany()
+                        .HasForeignKey("RolesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("middlerApp.Auth.Entities.MUser", null)
+                        .WithMany()
+                        .HasForeignKey("UsersId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("middlerApp.Auth.Entities.AuthAuthorization", b =>
                 {
-                    b.HasOne("middlerApp.Auth.Entities.AuthApplication", "Application")
+                    b.HasOne("middlerApp.Auth.Entities.Client", "Application")
                         .WithMany("Authorizations")
                         .HasForeignKey("ApplicationId");
 
@@ -231,7 +502,7 @@ namespace middlerApp.Auth.Sqlite.Migrations
 
             modelBuilder.Entity("middlerApp.Auth.Entities.AuthToken", b =>
                 {
-                    b.HasOne("middlerApp.Auth.Entities.AuthApplication", "Application")
+                    b.HasOne("middlerApp.Auth.Entities.Client", "Application")
                         .WithMany("Tokens")
                         .HasForeignKey("ApplicationId");
 
@@ -244,16 +515,97 @@ namespace middlerApp.Auth.Sqlite.Migrations
                     b.Navigation("Authorization");
                 });
 
-            modelBuilder.Entity("middlerApp.Auth.Entities.AuthApplication", b =>
+            modelBuilder.Entity("middlerApp.Auth.Entities.ClientPostLogoutRedirectUri", b =>
                 {
-                    b.Navigation("Authorizations");
+                    b.HasOne("middlerApp.Auth.Entities.Client", "Client")
+                        .WithMany("PostLogoutRedirectUris")
+                        .HasForeignKey("ClientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Navigation("Tokens");
+                    b.Navigation("Client");
+                });
+
+            modelBuilder.Entity("middlerApp.Auth.Entities.ClientRedirectUri", b =>
+                {
+                    b.HasOne("middlerApp.Auth.Entities.Client", "Client")
+                        .WithMany("RedirectUris")
+                        .HasForeignKey("ClientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Client");
+                });
+
+            modelBuilder.Entity("middlerApp.Auth.Entities.MExternalClaim", b =>
+                {
+                    b.HasOne("middlerApp.Auth.Entities.MUser", "User")
+                        .WithMany("ExternalClaims")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("middlerApp.Auth.Entities.MUserClaim", b =>
+                {
+                    b.HasOne("middlerApp.Auth.Entities.MUser", "User")
+                        .WithMany("Claims")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("middlerApp.Auth.Entities.MUserLogin", b =>
+                {
+                    b.HasOne("middlerApp.Auth.Entities.MUser", "User")
+                        .WithMany("Logins")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("middlerApp.Auth.Entities.MUserSecret", b =>
+                {
+                    b.HasOne("middlerApp.Auth.Entities.MUser", "User")
+                        .WithMany("Secrets")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("middlerApp.Auth.Entities.AuthAuthorization", b =>
                 {
                     b.Navigation("Tokens");
+                });
+
+            modelBuilder.Entity("middlerApp.Auth.Entities.Client", b =>
+                {
+                    b.Navigation("Authorizations");
+
+                    b.Navigation("PostLogoutRedirectUris");
+
+                    b.Navigation("RedirectUris");
+
+                    b.Navigation("Tokens");
+                });
+
+            modelBuilder.Entity("middlerApp.Auth.Entities.MUser", b =>
+                {
+                    b.Navigation("Claims");
+
+                    b.Navigation("ExternalClaims");
+
+                    b.Navigation("Logins");
+
+                    b.Navigation("Secrets");
                 });
 #pragma warning restore 612, 618
         }

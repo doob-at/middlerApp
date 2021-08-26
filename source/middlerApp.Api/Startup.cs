@@ -7,7 +7,9 @@ using Microsoft.Extensions.Hosting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
+using AutoMapper.EquivalencyExpression;
 using doob.SignalARRR.Server;
 using doob.SignalARRR.Server.ExtensionMethods;
 using doob.SignalARRR.Server.JsonConverters;
@@ -17,6 +19,7 @@ using middlerApp.Api.Converters;
 using middlerApp.Api.ExtensionMethods;
 using middlerApp.Api.Hubs;
 using middlerApp.Auth;
+using middlerApp.Events;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
@@ -59,9 +62,32 @@ namespace middlerApp.Api
 
             services.AddSignalARRR();
 
+            services.AddAutoMapper(config =>
+            {
+                config.AddCollectionMappers();
+            } ,Assembly.GetExecutingAssembly(), typeof(AuthServiceProviderExtensions).Assembly);
+
             services.AddResponseCompression();
 
+            var idpConfig = new IdpConfiguration()
+            {
+                AdminUIPostLogoutUris = new List<string>
+                {
+                    IdpUriGenerator.GenerateRedirectUri(sConfig.ListeningIP, sConfig.AdminSettings.HttpsPort),
+                    IdpUriGenerator.GenerateRedirectUri(sConfig.ListeningIP, 4200)
+                },
+                AdminUIRedirectUris = new List<string>
+                {
+                    IdpUriGenerator.GenerateRedirectUri(sConfig.ListeningIP, sConfig.AdminSettings.HttpsPort),
+                    IdpUriGenerator.GenerateRedirectUri(sConfig.ListeningIP, 4200)
+                }
+            };
+
+            services.AddSingleton<IdpConfiguration>(idpConfig);
+
             services.AddOpenIdDictAuthentication(sConfig.DbSettings.Provider, sConfig.DbSettings.ConnectionString);
+
+            services.AddSingleton<DataEventDispatcher>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
