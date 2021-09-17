@@ -1,7 +1,7 @@
 <div style="display: flex; width: 100%; overflow: hidden;" *ngIf="(loggedInUser$ | async); let user">
-  <ng-container *ngIf="uiContext$ | async; let ui">
+
   <nz-sider class="menu-sidebar" nzWidth="13rem" [nzTrigger]="null" nzTheme="light"
-    *ngIf="!ui.Sidebar.Hide">
+    *ngIf="!(uiContext$ | async)?.Sidebar?.Hide">
     <div class="sidebar-logo">
       <div *ngIf="!(sideBarCollapsed$ | async)">
         mAdmin
@@ -30,20 +30,8 @@
       </ng-template>
     </ul>
 
-    <ul nz-menu nzTheme="light" nzMode="inline" *ngIf="!user?.UserName">
+    <ul nz-menu nzTheme="light" nzMode="inline">
 
-
-
-      <div class="menu-header-item">
-        Middler
-      </div>
-
-      <li nz-menu-item nzMatchRouter [nzMatchRouterExact]="true">
-        <a routerLink="/">
-          <db-icon icon="dashboard"></db-icon>
-          <ng-container *ngIf="!(sideBarCollapsed$ | async)">Dashboard</ng-container>
-        </a>
-      </li>
       <li nz-menu-item nzMatchRouter>
         <a routerLink="/endpoint-rules">
           <db-icon icon="fa#fas|stream"></db-icon>
@@ -56,60 +44,48 @@
           <ng-container *ngIf="!(sideBarCollapsed$ | async)">Global Variables</ng-container>
         </a>
       </li>
+   
       <div class="menu-header-item">
-        Identity Provider
+        Identity Management
       </div>
 
-      <li nz-menu-item nzMatchRouter>
+      <li nz-menu-item nzMatchRouter [nzMatchRouterExact]="true">
         <a routerLink="/idp/users">
-          <db-icon icon="fa#user"></db-icon>
-          <ng-container>Users</ng-container>
-        </a>
-      </li>
-      <li nz-menu-item nzMatchRouter>
-        <a routerLink="/idp/roles">
-          <db-icon icon="fa#user-tag"></db-icon>
-          <ng-container>Roles</ng-container>
-        </a>
-      </li>
-      <li nz-menu-item nzMatchRouter>
-        <a routerLink="/idp/clients">
-          <db-icon icon="fa#desktop"></db-icon>
-          <ng-container>Clients</ng-container>
-        </a>
-      </li>
-      <li nz-menu-item nzMatchRouter>
-        <a routerLink="/idp/api-scopes">
-          <db-icon icon="fa#cube"></db-icon>
-          <ng-container>Api Scopes</ng-container>
-        </a>
-      </li>
-      <li nz-menu-item nzMatchRouter>
-        <a routerLink="/idp/api-resources">
-          <db-icon icon="fa#cubes"></db-icon>
-          <ng-container>Api Resources</ng-container>
-        </a>
-      </li>
-      <li nz-menu-item nzMatchRouter>
-        <a routerLink="/idp/identity-resources">
-          <db-icon icon="fa#address-card" theme="far"></db-icon>
-          <ng-container>Identity Resources</ng-container>
-        </a>
-      </li>
-      <li nz-menu-item nzMatchRouter>
-        <a routerLink="/idp/authentication-providers">
-          <db-icon icon="fa#shield-alt"></db-icon>
-          <ng-container>Authentication Providers</ng-container>
+          <db-icon icon="folder"></db-icon>
+          <ng-container *ngIf="!(sideBarCollapsed$ | async)">Users</ng-container>
         </a>
       </li>
 
+      <li nz-menu-item nzMatchRouter [nzMatchRouterExact]="true">
+        <a routerLink="/idp/roles">
+          <db-icon icon="folder"></db-icon>
+          <ng-container *ngIf="!(sideBarCollapsed$ | async)">Roles</ng-container>
+        </a>
+      </li>
+
+      <li nz-menu-item nzMatchRouter [nzMatchRouterExact]="true">
+        <a routerLink="/idp/applications">
+          <db-icon icon="folder"></db-icon>
+          <ng-container *ngIf="!(sideBarCollapsed$ | async)">Applications</ng-container>
+        </a>
+      </li>
+
+      <li nz-menu-item nzMatchRouter [nzMatchRouterExact]="true">
+        <a routerLink="/idp/auth-providers">
+          <db-icon icon="folder"></db-icon>
+          <ng-container *ngIf="!(sideBarCollapsed$ | async)">Auth Providers</ng-container>
+        </a>
+      </li>
+     
     </ul>
+   
+
     <div class="whitespace"></div>
     <ul nz-menu nzTheme="light" nzMode="inline" [nzInlineCollapsed]="sideBarCollapsed$ | async">
-      <li nz-menu-item nzMatchRouter [nzMatchRouterExact]="true">
-        <a routerLink="./app-settings">
+      <li nz-menu-item nzMatchRouter [nzMatchRouterExact]="false">
+        <a  routerLink="/dashboard">
           <db-icon icon="setting"></db-icon>
-          <ng-container *ngIf="!(sideBarCollapsed$ | async)">Settings</ng-container>
+          <ng-container *ngIf="!(sideBarCollapsed$ | async)">User Interface</ng-container>
         </a>
       </li>
     </ul>
@@ -118,9 +94,9 @@
   </nz-sider>
 
 
-  
+  <ng-container *ngIf="uiContext$ | async; let ui">
 
-    <div class="main" *ngIf="!!user?.UserName || ui.Content.ShowAlways">
+    <div class="main" *ngIf="user || ui.Content.ShowAlways">
 
       <div class="main-header">
         <div class="title-container ui container">

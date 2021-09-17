@@ -5,7 +5,8 @@ namespace middlerApp.Auth
 {
     internal static class IdpDefaultIdentifier
     {
-        public static Guid IdpClient { get; } = new Guid("00000001-0000-0000-0000-000000000000");
+        public static Guid AdminClient { get; } = new Guid("00000001-0000-0000-0000-000000000000");
+        public static Guid IdpClient { get; } = new Guid("00000001-0001-0000-0000-000000000000");
 
         public static Guid Role_IdentityServer_Administrators { get; } = new Guid("00000002-0001-0000-0000-000000000000");
 
@@ -16,6 +17,7 @@ namespace middlerApp.Auth
         public static Guid Scope_MiddlerAppApi_Id { get; } = new Guid("00000003-0003-0000-0000-000000000000");
 
         public static Guid Resource_MiddlerApi_Id { get; } = new Guid("00000004-0000-0000-0000-000000000000");
+        public static Guid Resource_IdpApi_Id { get; } = new Guid("00000004-0001-0000-0000-000000000000");
 
     }
 

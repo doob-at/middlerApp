@@ -6,6 +6,7 @@ using doob.Reflectensions;
 using Microsoft.EntityFrameworkCore;
 using middlerApp.Auth.Context;
 using middlerApp.Auth.Entities;
+using middlerApp.Auth.Managers;
 using OpenIddict.Abstractions;
 
 namespace middlerApp.Auth
@@ -13,22 +14,32 @@ namespace middlerApp.Auth
     public class DefaultResourcesManager
     {
         private readonly IdpConfiguration _idpConfiguration;
+        private readonly AuthApplicationManager _authApplicationManager;
+        private readonly AuthScopeManager _authScopeManager;
         public AuthDbContext DbContext { get; }
 
 
 
-        public DefaultResourcesManager(AuthDbContext dbContext, IdpConfiguration idpConfiguration)
+        public DefaultResourcesManager(AuthDbContext dbContext, IdpConfiguration idpConfiguration, AuthApplicationManager authApplicationManager, AuthScopeManager authScopeManager)
         {
             _idpConfiguration = idpConfiguration;
+            _authApplicationManager = authApplicationManager;
+            _authScopeManager = authScopeManager;
             DbContext = dbContext;
         }
 
 
         public void EnsureAllResourcesExists()
         {
-            Console.WriteLine("EnsureAllResourcesExists");
+            //Console.WriteLine("EnsureAllResourcesExists");
             EnsureAdminClientExists().GetAwaiter().GetResult();
+            EnsureAdminApiExists().GetAwaiter().GetResult();
             EnsureAdminRoleExists().GetAwaiter().GetResult();
+            EnsureAdminApiScopeExists().GetAwaiter().GetResult();
+
+            EnsureIdpClientExists().GetAwaiter().GetResult();
+            EnsureIdpApiExists().GetAwaiter().GetResult();
+            EnsureIdpApiScopeExists().GetAwaiter().GetResult();
         }
 
         public async Task EnsureAdminClientExists()
@@ -37,7 +48,7 @@ namespace middlerApp.Auth
             var adminClient = DbContext.Clients
                 .Include(c => c.RedirectUris)
 
-                .FirstOrDefault(c => c.Id == IdpDefaultIdentifier.IdpClient);
+                .FirstOrDefault(c => c.Id == IdpDefaultIdentifier.AdminClient);
 
             if (adminClient != null)
             {
@@ -49,9 +60,9 @@ namespace middlerApp.Auth
             //await EnsureDefaultScopesExists();
 
             var client = new Client();
-            client.Id = IdpDefaultIdentifier.IdpClient;
-            client.ClientId = "scsmportal";
-            client.DisplayName = "Scsm Portal UI";
+            client.Id = IdpDefaultIdentifier.AdminClient;
+            client.ClientId = "middlerUI";
+            client.DisplayName = "middler UI";
             client.Type = OpenIddictConstants.ClientTypes.Public;
             client.Permissions = Json.Converter.ToJson(new HashSet<string>()
             {
@@ -60,23 +71,79 @@ namespace middlerApp.Auth
                 OpenIddictConstants.Permissions.Endpoints.Token,
                 OpenIddictConstants.Permissions.Endpoints.Revocation,
                 OpenIddictConstants.Permissions.GrantTypes.AuthorizationCode,
+                OpenIddictConstants.Permissions.GrantTypes.Implicit,
                 OpenIddictConstants.Permissions.GrantTypes.ClientCredentials,
                 OpenIddictConstants.Permissions.GrantTypes.RefreshToken,
                 OpenIddictConstants.Permissions.ResponseTypes.Code,
+                OpenIddictConstants.Permissions.ResponseTypes.IdToken,
+                OpenIddictConstants.Permissions.ResponseTypes.IdTokenToken,
                 OpenIddictConstants.Permissions.Scopes.Email,
                 OpenIddictConstants.Permissions.Scopes.Profile,
                 OpenIddictConstants.Permissions.Scopes.Roles,
-                OpenIddictConstants.Permissions.Prefixes.Scope + "dataEventRecords"
+                OpenIddictConstants.Permissions.Prefixes.Scope + "admin_api"
             });
             
-            SetUris(client);
+            SetAdminRedirectUris(client);
            
-
-            await DbContext.Clients.AddAsync(client);
-            await DbContext.SaveChangesAsync();
+            await _authApplicationManager.CreateAsync(client);
+            //await DbContext.Clients.AddAsync(client);
+            //await DbContext.SaveChangesAsync();
 
         }
 
+        public async Task EnsureAdminApiExists()
+        {
+
+            var adminApi = DbContext.Clients
+                .Include(c => c.RedirectUris)
+
+                .FirstOrDefault(c => c.Id == IdpDefaultIdentifier.Resource_MiddlerApi_Id);
+            
+            if (adminApi != null)
+            {
+                return;
+            }
+
+            var client = new Client();
+            client.Id = IdpDefaultIdentifier.Resource_MiddlerApi_Id;
+            client.ClientId = "middlerApi";
+            client.DisplayName = "middler Api";
+            var clientSecret = "846B62D0-DEF9-4215-A99D-86E6B8DAB342";
+            client.Type = OpenIddictConstants.ClientTypes.Confidential;
+            client.Permissions = Json.Converter.ToJson(new HashSet<string>()
+            {
+                OpenIddictConstants.Permissions.Endpoints.Introspection
+            });
+
+            await _authApplicationManager.CreateAsync(client, clientSecret);
+
+            //await DbContext.Clients.AddAsync(client);
+            //await DbContext.SaveChangesAsync();
+
+        }
+
+        public async Task EnsureAdminApiScopeExists()
+        {
+            var scope = await DbContext.AuthScopes
+                .FirstOrDefaultAsync(sc => sc.Name == "admin_api");
+
+            if (scope != null)
+            {
+                return;
+            }
+
+            var newScope = new AuthScope();
+            newScope.Name = "admin_api";
+            newScope.Resources = Json.Converter.ToJson(new HashSet<string>()
+            {
+                "middlerApi"
+            });
+
+            await _authScopeManager.CreateAsync(newScope);
+            //await DbContext.AuthScopes.AddAsync(newScope);
+            //await DbContext.SaveChangesAsync();
+
+        }
         //public async Task EnsureAdminApiExists()
         //{
         //    var apiResource = await
@@ -124,16 +191,125 @@ namespace middlerApp.Auth
         //}
         private void UpdateAdminClient(Client client)
         {
-            SetUris(client);
+            SetAdminRedirectUris(client);
+            DbContext.SaveChanges();
+        }
+
+        private void UpdateIdpClient(Client client)
+        {
+            SetIdpRedirectUris(client);
             DbContext.SaveChanges();
         }
 
 
-        private void SetUris(Client client)
+        public async Task EnsureIdpClientExists()
         {
-            SetRedirectUris(client);
-            //SetCorsUris(client);
+
+            var adminClient = DbContext.Clients
+                .Include(c => c.RedirectUris)
+
+                .FirstOrDefault(c => c.Id == IdpDefaultIdentifier.IdpClient);
+
+            if (adminClient != null)
+            {
+                UpdateIdpClient(adminClient);
+                return;
+            }
+
+
+            //await EnsureDefaultScopesExists();
+
+            var client = new Client();
+            client.Id = IdpDefaultIdentifier.IdpClient;
+            client.ClientId = "identityUI";
+            client.DisplayName = "Identity UI";
+            client.Type = OpenIddictConstants.ClientTypes.Public;
+            client.Permissions = Json.Converter.ToJson(new HashSet<string>()
+            {
+                OpenIddictConstants.Permissions.Endpoints.Authorization,
+                OpenIddictConstants.Permissions.Endpoints.Logout,
+                OpenIddictConstants.Permissions.Endpoints.Token,
+                OpenIddictConstants.Permissions.Endpoints.Revocation,
+                OpenIddictConstants.Permissions.GrantTypes.AuthorizationCode,
+                OpenIddictConstants.Permissions.GrantTypes.Implicit,
+                OpenIddictConstants.Permissions.GrantTypes.ClientCredentials,
+                OpenIddictConstants.Permissions.GrantTypes.RefreshToken,
+                OpenIddictConstants.Permissions.ResponseTypes.Code,
+                OpenIddictConstants.Permissions.Scopes.Email,
+                OpenIddictConstants.Permissions.Scopes.Profile,
+                OpenIddictConstants.Permissions.Scopes.Roles,
+                OpenIddictConstants.Permissions.Prefixes.Scope + "idp_api"
+            });
+            
+            SetIdpRedirectUris(client);
+           
+            await _authApplicationManager.CreateAsync(client);
+            //await DbContext.Clients.AddAsync(client);
+            //await DbContext.SaveChangesAsync();
+
         }
+
+        public async Task EnsureIdpApiExists()
+        {
+
+            var adminApi = DbContext.Clients
+                .Include(c => c.RedirectUris)
+
+                .FirstOrDefault(c => c.Id == IdpDefaultIdentifier.Resource_IdpApi_Id);
+            
+            if (adminApi != null)
+            {
+                return;
+            }
+
+            var client = new Client();
+            client.Id = IdpDefaultIdentifier.Resource_IdpApi_Id;
+            client.ClientId = "identityApi";
+            client.DisplayName = "Identity Api";
+            var clientSecret = "846B62D0-DEF9-4215-A99D-86E6B8DAB342";
+            client.Type = OpenIddictConstants.ClientTypes.Confidential;
+            client.Permissions = Json.Converter.ToJson(new HashSet<string>()
+            {
+                OpenIddictConstants.Permissions.Endpoints.Introspection
+            });
+
+            await _authApplicationManager.CreateAsync(client, clientSecret);
+
+            //await DbContext.Clients.AddAsync(client);
+            //await DbContext.SaveChangesAsync();
+
+        }
+
+
+        public async Task EnsureIdpApiScopeExists()
+        {
+            var scope = await DbContext.AuthScopes
+                .FirstOrDefaultAsync(sc => sc.Name == "idp_api");
+
+            if (scope != null)
+            {
+                return;
+            }
+
+            var newScope = new AuthScope();
+            newScope.Name = "idp_api";
+            newScope.Resources = Json.Converter.ToJson(new HashSet<string>()
+            {
+                "identityApi"
+            });
+
+            await _authScopeManager.CreateAsync(newScope);
+            //await DbContext.AuthScopes.AddAsync(newScope);
+            //await DbContext.SaveChangesAsync();
+
+        }
+
+
+        //private void SetUris(Client client)
+        //{
+        //    SetAdminRedirectUris(client);
+        //    //SetCorsUris(client);
+        //}
 
         //private string GenerateIdpRedirectUri()
         //{
@@ -171,7 +347,7 @@ namespace middlerApp.Auth
         //    }
         //}
 
-        private void SetRedirectUris(Client client)
+        private void SetAdminRedirectUris(Client client)
         {
             var uris = client.RedirectUris.Select(u => u.RedirectUri).ToList();
 
@@ -200,6 +376,37 @@ namespace middlerApp.Auth
             }
 
         }
+
+        private void SetIdpRedirectUris(Client client)
+        {
+            var uris = client.RedirectUris.Select(u => u.RedirectUri).ToList();
+
+            foreach (var uri in _idpConfiguration.IdpUIRedirectUris)
+            {
+                if (!uris.Contains(uri))
+                {
+                    client.RedirectUris.Add(new ClientRedirectUri()
+                    {
+                        ClientId = client.Id,
+                        RedirectUri = uri
+                    });
+                }
+            }
+
+            foreach (var uri in _idpConfiguration.IdpUIRedirectUris)
+            {
+                if (!uris.Contains(uri))
+                {
+                    client.PostLogoutRedirectUris.Add(new ClientPostLogoutRedirectUri()
+                    {
+                        ClientId = client.Id,
+                        PostLogoutRedirectUri = uri
+                    });
+                }
+            }
+
+        }
+
 
         //private void SetCorsUris(Client client)
         //{

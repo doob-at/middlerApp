@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using doob.Reflectensions.Common;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using middlerApp.Auth;
 using Serilog.Events;
 
 namespace middlerApp.Api
@@ -21,6 +23,8 @@ namespace middlerApp.Api
 
         public DatabaseConfiguration DbSettings { get; } = new DatabaseConfiguration();
 
+        public Dictionary<string, object> EnrichJson { get; private set; } = new();
+
         public StartUpConfiguration SetDefaultSettings()
         {
             AdminSettings.ListeningIP = AdminSettings.ListeningIP?.Trim().ToNull() ?? ListeningIP;
@@ -33,6 +37,18 @@ namespace middlerApp.Api
             IdpSettings.HttpsCertPath = IdpSettings.HttpsCertPath?.Trim().ToNull() ?? HttpsCertPath;
             IdpSettings.HttpsCertPassword = IdpSettings.HttpsCertPassword?.Trim().ToNull() ?? HttpsCertPassword;
 
+
+            if (!EnrichJson.ContainsKey("path_appuiconfig"))
+            {
+                EnrichJson["path_appuiconfig"] = "/assets/appuiconfig.json";
+            }
+
+            if (!EnrichJson.ContainsKey("appuiconfig_IdpBaseUrl"))
+            {
+                EnrichJson["appuiconfig_IdpBaseUrl"] =
+                    IdpUriGenerator.GenerateRedirectUri(IdpSettings.ListeningIP, IdpSettings.HttpsPort);
+            }
+            
             return this;
         }
     }
@@ -91,8 +107,9 @@ namespace middlerApp.Api
         {
             return new Dictionary<string, LogEventLevel>(StringComparer.OrdinalIgnoreCase)
             {
-                ["Default"] = LogEventLevel.Debug,
-                ["Microsoft.Hosting.Lifetime"] = LogEventLevel.Debug
+                ["Default"] = LogEventLevel.Error,
+                ["Microsoft.Hosting.Lifetime"] = LogEventLevel.Error,
+                ["OpenIddict"] = LogEventLevel.Verbose
             };
         }
     }

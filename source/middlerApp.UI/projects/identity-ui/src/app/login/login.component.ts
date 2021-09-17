@@ -1,27 +1,27 @@
-import { Component, ChangeDetectionStrategy } from "@angular/core";
-import { FormGroup, FormBuilder, Validators } from '@angular/forms';
-import { IdpService } from '../shared/services/idp/idp.service';
-import { ActivatedRoute, Router } from '@angular/router';
-import { take } from 'rxjs/operators';
-import { LoginInputModel } from '../shared/services/idp/models/login-input-model';
-import { AuthService } from '../shared/services';
-import { ExternalLoginModel } from '../shared/services/idp/models/external-login-model';
-import { LoginViewModel } from "../shared/services/idp/models/login-view-model";
+import { Component } from "@angular/core";
+import { FormBuilder, FormGroup, Validators } from "@angular/forms";
+import { ActivatedRoute, Router } from "@angular/router";
+import { take } from "rxjs/operators";
+import { IdpService } from "../idp-service";
+import { ExternalLoginModel } from "../models/external-login-model";
+import { LoginInputModel } from "../models/login-input-model";
+import { LoginViewModel } from "../models/login-view-model";
 
 @Component({
     templateUrl: './login.component.html',
-    styleUrls: ['./login.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush
+    styleUrls: ['./login.component.scss']
 })
-export class IdpUILoginComponent {
+export class LoginComponent {
 
     form!: FormGroup;
 
-    viewModel: LoginViewModel = new LoginViewModel();
+    viewModel!: LoginViewModel;
     errors: any;
 
 
-    constructor(private fb: FormBuilder, private idpService: IdpService, private route: ActivatedRoute, private router: Router, private auth: AuthService) { }
+    constructor(private fb: FormBuilder, private idpService: IdpService, private route: ActivatedRoute, private router: Router) {
+
+     }
 
     ngOnInit(): void {
         this.form = this.fb.group({
@@ -32,15 +32,16 @@ export class IdpUILoginComponent {
 
         this.route.queryParamMap.pipe(take(1)).subscribe(qmap => {
 
-            let returnUrl: string = "";
+            let returnUrl: string | null;
             for (const key of qmap.keys) {
                 if (key.toLowerCase() === 'returnurl') {
-                    returnUrl = qmap.get(key) ?? "";
+                    returnUrl = qmap.get(key);
                 }
             }
 
-            this.idpService.GetLoginViewModel(returnUrl).subscribe(vm => {
+            this.idpService.GetLoginViewModel(returnUrl!).subscribe((vm) => {
                 this.viewModel = vm;
+                
                 this.form.patchValue(vm);
                 // setTimeout(() => {
                 //     this.form.get('Provider').patchValue(vm.DefaultProvider);
@@ -62,7 +63,7 @@ export class IdpUILoginComponent {
         }
 
         const model = <LoginInputModel>this.form.value;
-        model.ReturnUrl = this.viewModel?.ReturnUrl ?? "";
+        model.ReturnUrl = this.viewModel.ReturnUrl;
 
         console.log(this.form.value);
 
@@ -77,8 +78,8 @@ export class IdpUILoginComponent {
                 switch (result.Status) {
                     case 'Confirmed':
                     case 'Ok':
-                        // console.log("OK")
-                        // this.auth.GetAccessToken();
+                        console.log("OK")
+                        
                         if (result.ReturnUrl) {
                             // const url =  window.location.origin + result.ReturnUrl;
                             // console.log("locations", url)
@@ -100,10 +101,10 @@ export class IdpUILoginComponent {
     }
 
     LoginExternal(scheme: string) {
-        console.log(this.viewModel);
+         console.log(this.viewModel);
 
         const model = new ExternalLoginModel();
-        model.ReturnUrl = this.viewModel?.ReturnUrl ?? "";
+        model.ReturnUrl = this.viewModel.ReturnUrl;
         model.Scheme = scheme;
         
         this.idpService.SendExternalLoginInputModel(model).subscribe(result => {
@@ -111,8 +112,8 @@ export class IdpUILoginComponent {
             switch (result.Status) {
                 case 'Confirmed':
                 case 'Ok':
-                    // console.log("OK")
-                    // this.auth.GetAccessToken();
+                    console.log("OK")
+                    
                     if (result.ReturnUrl) {
                         // const url =  window.location.origin + result.ReturnUrl;
                         // console.log("locations", url)

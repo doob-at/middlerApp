@@ -1,9 +1,7 @@
 const PROXY_CONFIG = [
     {
         context: [
-            "/_",
-            "/.well-known",
-            "/connect"
+            "/_NICHTS"
         ],
         target: "https://localhost:4445",
         changeOrigin: true,
@@ -12,7 +10,7 @@ const PROXY_CONFIG = [
             
             req.headers["X-Forwarded-For"] = "127.0.0.1";
             req.headers["X-Forwarded-Proto"] = "http"
-            req.headers["X-Forwarded-Host"] = "http://localhost:4200"
+            req.headers["X-Forwarded-Host"] = "http://localhost:4300"
         },
         onProxyRes: proxyRes => {
             let key = 'www-authenticate';

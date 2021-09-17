@@ -8,7 +8,7 @@ using middlerApp.Api.Attributes;
 using middlerApp.Auth.Models.DTO;
 using middlerApp.Auth.Services;
 
-namespace ScsmPortal.API.Controllers.Admin.Auth
+namespace middlerApp.Api.Controllers.Admin.Auth
 {
     [ApiController]
     [Route("_api/idp/roles")]

@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Net;
+using System.Threading.Tasks;
 using doob.Reflectensions;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
@@ -17,7 +18,7 @@ namespace middlerApp.Api
 
 
 
-        public static int Main(string[] args)
+        public static async Task<int> Main(string[] args)
         {
 
             try
@@ -25,8 +26,14 @@ namespace middlerApp.Api
                 ConfigureLogging();
 
                 Log.Information("Starting host");
-                CreateWebHostBuilder(args).Build().Run();
-                //CreateAdminHost(args).Build().Run();
+                var idpHost = CreateIdpHost(args).Build();
+                var adminHost = CreateAdminHost(args).Build();
+
+                await Task.WhenAny(
+                    idpHost.RunAsync(), 
+                    adminHost.RunAsync()
+                );
+                
                 return 0;
             }
             catch (Exception ex)
@@ -41,7 +48,7 @@ namespace middlerApp.Api
         }
 
 
-        public static IHostBuilder CreateWebHostBuilder(string[] args)
+        public static IHostBuilder CreateIdpHost(string[] args)
         {
 
             return Host.CreateDefaultBuilder(args)
@@ -49,9 +56,23 @@ namespace middlerApp.Api
                 .ConfigureAppConfiguration(BuildHostConfiguration)
                 .ConfigureWebHostDefaults(webBuilder => webBuilder
                         .UseContentRoot(PathHelper.ContentPath)
-                        .UseWebRoot(PathHelper.GetFullPath(Static.StartUpConfiguration.AdminSettings.WebRoot))
-                        .UseKestrel(ConfigureKestrel)
-                        .UseStartup<Startup>()
+                        .UseWebRoot(PathHelper.GetFullPath(Static.StartUpConfiguration.IdpSettings.WebRoot))
+                        .UseKestrel(ConfigureIdpKestrel)
+                        .UseStartup<IdpStartup>()
+                );
+        }
+
+        public static IHostBuilder CreateAdminHost(string[] args)
+        {
+
+            return Host.CreateDefaultBuilder(args)
+                .UseSerilog()
+                .ConfigureAppConfiguration(BuildHostConfiguration)
+                .ConfigureWebHostDefaults(webBuilder => webBuilder
+                    .UseContentRoot(PathHelper.ContentPath)
+                    .UseWebRoot(PathHelper.GetFullPath(Static.StartUpConfiguration.AdminSettings.WebRoot))
+                    .UseKestrel(ConfigureAdminKestrel)
+                    .UseStartup<AdminStartup>()
                 );
         }
 
@@ -131,40 +152,40 @@ namespace middlerApp.Api
         }
 
 
-        private static void ConfigureKestrel(WebHostBuilderContext context, KestrelServerOptions serverOptions)
+        private static void ConfigureIdpKestrel(WebHostBuilderContext context, KestrelServerOptions serverOptions)
         {
-            Log.Debug("ConfigureKestrel");
+            
             var config = context.Configuration.Get<StartUpConfiguration>();
             config.SetDefaultSettings();
 
-            var listenIp = IPAddress.Parse(config.ListeningIP);
+            //var listenIp = IPAddress.Parse(config.ListeningIP);
 
-            if (config.HttpPort.HasValue && config.HttpPort.Value != 0)
-            {
-                serverOptions.Listen(listenIp, config.HttpPort.Value, listenOptions =>
-                {
-                    listenOptions.Protocols = HttpProtocols.Http1AndHttp2;
-                });
-            }
+            //if (config.HttpPort.HasValue && config.HttpPort.Value != 0)
+            //{
+            //    serverOptions.Listen(listenIp, config.HttpPort.Value, listenOptions =>
+            //    {
+            //        listenOptions.Protocols = HttpProtocols.Http1AndHttp2;
+            //    });
+            //}
 
-            if (config.HttpsPort.HasValue && config.HttpsPort.Value != 0)
-            {
-                var certPath = PathHelper.GetFullPath(config.HttpsCertPath);
-                Log.Debug(certPath);
-                serverOptions.Listen(listenIp, config.HttpsPort.Value, listenOptions =>
-                {
-                    listenOptions.Protocols = HttpProtocols.Http1AndHttp2;
-                    listenOptions.UseHttps(PathHelper.GetFullPath(config.HttpsCertPath), config.HttpsCertPassword);
-                });
-            }
+            //if (config.HttpsPort.HasValue && config.HttpsPort.Value != 0)
+            //{
+            //    var certPath = PathHelper.GetFullPath(config.HttpsCertPath);
+            //    Log.Debug(certPath);
+            //    serverOptions.Listen(listenIp, config.HttpsPort.Value, listenOptions =>
+            //    {
+            //        listenOptions.Protocols = HttpProtocols.Http1AndHttp2;
+            //        listenOptions.UseHttps(PathHelper.GetFullPath(config.HttpsCertPath), config.HttpsCertPassword);
+            //    });
+            //}
 
-            var adminListenIp = IPAddress.Parse(config.AdminSettings.ListeningIP);
-            serverOptions.Listen(adminListenIp, config.AdminSettings.HttpsPort, options =>
-            {
-                options.Protocols = HttpProtocols.Http1AndHttp2;
-                options.UseHttps(PathHelper.GetFullPath(config.AdminSettings.HttpsCertPath),
-                    config.AdminSettings.HttpsCertPassword);
-            });
+            //var adminListenIp = IPAddress.Parse(config.AdminSettings.ListeningIP);
+            //serverOptions.Listen(adminListenIp, config.AdminSettings.HttpsPort, options =>
+            //{
+            //    options.Protocols = HttpProtocols.Http1AndHttp2;
+            //    options.UseHttps(PathHelper.GetFullPath(config.AdminSettings.HttpsCertPath),
+            //        config.AdminSettings.HttpsCertPassword);
+            //});
 
             var idpListenIp = IPAddress.Parse(config.IdpSettings.ListeningIP);
             serverOptions.Listen(idpListenIp, config.IdpSettings.HttpsPort, options =>
@@ -176,6 +197,21 @@ namespace middlerApp.Api
 
         }
 
+        private static void ConfigureAdminKestrel(WebHostBuilderContext context, KestrelServerOptions serverOptions)
+        {
+            
+            var config = context.Configuration.Get<StartUpConfiguration>();
+            config.SetDefaultSettings();
+
+            var adminListenIp = IPAddress.Parse(config.AdminSettings.ListeningIP);
+            serverOptions.Listen(adminListenIp, config.AdminSettings.HttpsPort, options =>
+            {
+                options.Protocols = HttpProtocols.Http1AndHttp2;
+                options.UseHttps(PathHelper.GetFullPath(config.AdminSettings.HttpsCertPath),
+                    config.AdminSettings.HttpsCertPassword);
+            });
+
+        }
 
 
     }

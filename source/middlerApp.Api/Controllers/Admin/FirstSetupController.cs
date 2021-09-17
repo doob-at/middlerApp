@@ -2,12 +2,12 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using middlerApp.Api.Attributes;
+using middlerApp.Api.Models;
 using middlerApp.Auth;
 using middlerApp.Auth.Entities;
 using middlerApp.Auth.Services;
-using ScsmPortal.API.Models;
 
-namespace ScsmPortal.API.Controllers.Admin
+namespace middlerApp.Api.Controllers.Admin
 {
     [ApiController]
     [Route("_api/first-setup")]

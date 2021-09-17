@@ -37,8 +37,8 @@ namespace middlerApp.Auth
                 //})
                 .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
                 {
-                    options.LoginPath = "/auth/login";
-                    options.LogoutPath = "/auth/logout";
+                    options.LoginPath = $"/login";
+                    options.LogoutPath = "/logout";
                 }); ;
 
             services.AddDbContext<AuthDbContext>(options =>
@@ -149,16 +149,18 @@ namespace middlerApp.Auth
                         .AllowRefreshTokenFlow()
                         .AllowClientCredentialsFlow()
                         .AllowAuthorizationCodeFlow()
+                        .AllowImplicitFlow();
                         ;
 
 
                     options
                         .UseReferenceAccessTokens()
-                        .UseReferenceRefreshTokens();
+                        .UseReferenceRefreshTokens()
+                        ;
 
                     options.RegisterScopes(OpenIddictConstants.Scopes.Email, OpenIddictConstants.Scopes.Profile, OpenIddictConstants.Scopes.Roles, "dataEventRecords");
 
-                    options.SetAccessTokenLifetime(TimeSpan.FromMinutes(30));
+                    options.SetAccessTokenLifetime(TimeSpan.FromDays(3));
                     options.SetRefreshTokenLifetime(TimeSpan.FromDays(7));
 
                     options.AddDevelopmentEncryptionCertificate()
@@ -181,6 +183,9 @@ namespace middlerApp.Auth
                 {
                     options.UseLocalServer();
                     options.UseAspNetCore();
+                    //options.SetIssuer("https://localhost:4444/");
+                    //options.UseIntrospection();
+                    //options.UseSystemNetHttp();
                 });
 
            

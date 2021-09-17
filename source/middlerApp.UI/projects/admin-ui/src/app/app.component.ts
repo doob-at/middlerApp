@@ -1,21 +1,21 @@
-import { Component, ChangeDetectionStrategy, OnInit, ChangeDetectorRef, AfterViewInit } from '@angular/core';
-import { AppInitializeService } from './app-initialize.service';
-
-import { tap, share, map, filter } from 'rxjs/operators';
-import { ActivatedRoute, Router, RouterLink, NavigationEnd } from '@angular/router';
-import { AppUIService, AuthQuery, AuthService } from './shared/services';
+import { Component } from '@angular/core';
+import { OidcSecurityService } from 'angular-auth-oidc-client';
+import { map } from 'rxjs/operators';
+import { AppUIService } from '@shared/services';
+import { AuthQuery } from '@shared/auth/auth.store';
+import { AuthService } from '@shared/auth/auth.service';
 
 @Component({
     selector: 'app-root',
     templateUrl: './app.component.html',
-    styleUrls: ['./app.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush
+    styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
 
     sideBarCollapsed$ = this.uiService.sideBarCollapsed$;
     uiContext$ = this.uiService.UIContext$;
     loggedInUser$ = this.authQuery.loggedInUser$;
+    UIMenu = true;
 
     userName$ = this.loggedInUser$.pipe(
         map(user => {
@@ -23,38 +23,33 @@ export class AppComponent {
                 return null;
             }
             var name = user.UserName;
-            if(user.FirstName?.trim() && user.LastName?.trim()) {
+            if (user.FirstName?.trim() && user.LastName?.trim()) {
                 name = `${user.FirstName?.trim()} ${user.LastName?.trim()}`
             }
-            
+
             return name;
         })
     );
 
-    constructor(private initService: AppInitializeService, private uiService: AppUIService, private authQuery: AuthQuery, private authService: AuthService) {
+    constructor(
+        //private initService: AppInitializeService, 
+        private uiService: AppUIService,
+        private authQuery: AuthQuery,
+        private authService: AuthService, 
+        public oidcSecurityService: OidcSecurityService) {
 
-        uiService.SetDefault(ui => {
-            ui.Content.Scrollable = false;
-            ui.Content.Container = true;
-            ui.Header.Icon = "";
-            ui.Footer.Show = false;
+        uiService.Set(ui => {
+            ui.Header.Title = "Administration"
+            ui.Header.Icon = "setting";
         })
 
     }
-    
-       
-    identity = false;
-
-    toggleSideBar() {
-        this.uiService.toggleSideBar();
-    }
 
     Login() {
-        this.authService.LogIn();
+        this.oidcSecurityService.authorize();
     }
 
     Logout() {
-        this.authService.LogOut();
+        this.oidcSecurityService.logoffAndRevokeTokens().subscribe(ev => console.log(ev))
     }
-
 }

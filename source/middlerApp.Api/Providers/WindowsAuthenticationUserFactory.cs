@@ -101,6 +101,7 @@ namespace middlerApp.Api.Providers
                 
                 if (_claimsPrincipal.Identity is WindowsIdentity wi)
                 {
+                    
                     foreach (var identityReference in wi.Groups)
                     {
                         try

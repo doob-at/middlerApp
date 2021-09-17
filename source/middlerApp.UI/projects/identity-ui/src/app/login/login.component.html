@@ -32,7 +32,7 @@
 
         </div>
         <div class="external-providers">
-            <button *ngFor="let provider of viewModel.ExternalProviders" type="button" (click)="LoginExternal(provider.AuthenticationScheme)">{{provider.DisplayName}}</button>
+            <button *ngFor="let provider of viewModel?.ExternalProviders" type="button" (click)="LoginExternal(provider.AuthenticationScheme)">{{provider.DisplayName}}</button>
         </div>
     </div>
 </form>

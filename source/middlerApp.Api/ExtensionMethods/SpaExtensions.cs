@@ -39,6 +39,7 @@ namespace middlerApp.Api.ExtensionMethods
                     }
                 };
 
+                
 
                 app.UseDefaultFiles();
                 app.UseStaticFiles(stfOptions);
@@ -46,6 +47,8 @@ namespace middlerApp.Api.ExtensionMethods
                 app.UseSpa(spa =>
                 {
                     spa.Options.DefaultPageStaticFileOptions = stfOptions;
+                    
+                    
                 });
             
         }
@@ -58,7 +61,6 @@ namespace middlerApp.Api.ExtensionMethods
                 app.UseSpa(spa =>
                 {
                     spa.UseProxyToSpaDevelopmentServer(devProxy);
-                    
                 });
             }
             else

@@ -13,7 +13,7 @@ using middlerApp.DataAccess;
 using middlerApp.DataAccess.Entities.Models;
 using middlerApp.SharedModels.Interfaces;
 
-namespace ScsmPortal.API.Controllers.Admin
+namespace middlerApp.Api.Controllers.Admin
 {
     [ApiController]
     [Route("_api/variables")]

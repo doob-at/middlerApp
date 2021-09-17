@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace ScsmPortal.API.Models
+namespace middlerApp.Api.Models
 {
     public class FirstSetupModel
     {

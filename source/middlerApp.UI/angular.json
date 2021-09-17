@@ -1,8 +1,5 @@
 {
   "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
-  "cli": {
-    "defaultCollection": "@datorama/akita"
-  },
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
@@ -31,10 +28,15 @@
             "inlineStyleLanguage": "scss",
             "assets": [
               "projects/admin-ui/src/favicon.ico",
-              "projects/admin-ui/src/assets"
+              "projects/admin-ui/src/assets",
+              {
+                "glob": "**/*",
+                "input": "./node_modules/@ant-design/icons-angular/src/inline-svg/",
+                "output": "/assets/"
+              }
             ],
             "styles": [
-              "projects/admin-ui/src/theme.less",
+              "projects/shared/theme.less",
               "projects/admin-ui/src/styles.scss"
             ],
             "scripts": []
@@ -138,10 +140,15 @@
             "inlineStyleLanguage": "scss",
             "assets": [
               "projects/identity-ui/src/favicon.ico",
-              "projects/identity-ui/src/assets"
+              "projects/identity-ui/src/assets",
+              {
+                "glob": "**/*",
+                "input": "./node_modules/@ant-design/icons-angular/src/inline-svg/",
+                "output": "/assets/"
+              }
             ],
             "styles": [
-              "projects/identity-ui/src/theme.less",
+              "projects/shared/theme.less",
               "projects/identity-ui/src/styles.scss"
             ],
             "scripts": []

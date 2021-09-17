@@ -21,6 +21,24 @@
       "dom"
     ],
     "paths": {
+      "@shared": [
+        "projects/shared"
+      ],
+      "@shared/*": [
+        "projects/shared/*"
+      ],
+      "@admin": [
+        "projects/admin-ui/src/app"
+      ],
+      "@admin/*": [
+        "projects/admin-ui/src/app/*"
+      ],
+      "@admin-shared": [
+        "projects/admin-ui/src/app/shared"
+      ],
+      "@admin-shared/*": [
+        "projects/admin-ui/src/app/shared/*"
+      ]
     }
   },
   "angularCompilerOptions": {

@@ -23,12 +23,11 @@ namespace middlerApp.Auth.Stores
     public class AuthScopeStore: IOpenIddictScopeStore<AuthScope>
     {
 
-        private readonly IMemoryCache _cache;
         private readonly AuthDbContext Context;
 
         public AuthScopeStore(IMemoryCache cache, AuthDbContext dbContext)
         {
-            _cache = cache;
+            Cache = cache;
             Context = dbContext;
         }
 
