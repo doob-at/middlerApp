@@ -30,7 +30,7 @@
     "@angular/router": "~12.2.0",
     "@datorama/akita": "^6.2.3",
     "@datorama/akita-ng-router-store": "^6.0.0",
-    "@doob-ng/antd-extensions": "^2.0.2",
+    "@doob-ng/antd-extensions": "^2.1.0",
     "@doob-ng/cdk-helper": "^2.0.0",
     "@doob-ng/core": "^2.0.0",
     "@doob-ng/editor": "^2.0.0",
