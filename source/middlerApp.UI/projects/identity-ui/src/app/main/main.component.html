@@ -4,10 +4,10 @@
       *ngIf="!(uiContext$ | async)?.Sidebar?.Hide">
       <div class="sidebar-logo">
         <div *ngIf="!(sideBarCollapsed$ | async)">
-          mAdmin
+          mIdentity
         </div>
         <div *ngIf="sideBarCollapsed$ | async">
-          mA
+          mI
         </div>
       </div>
       <ul nz-menu nzTheme="light" nzMode="inline">
@@ -50,29 +50,29 @@
         </div>
   
         <li nz-menu-item nzMatchRouter [nzMatchRouterExact]="true">
-          <a routerLink="/idp/users">
-            <db-icon icon="folder"></db-icon>
+          <a routerLink="/users">
+            <db-icon icon="fa#user"></db-icon>
             <ng-container *ngIf="!(sideBarCollapsed$ | async)">Users</ng-container>
           </a>
         </li>
   
         <li nz-menu-item nzMatchRouter [nzMatchRouterExact]="true">
-          <a routerLink="/idp/roles">
-            <db-icon icon="folder"></db-icon>
+          <a routerLink="/roles">
+            <db-icon icon="fa#user-tag"></db-icon>
             <ng-container *ngIf="!(sideBarCollapsed$ | async)">Roles</ng-container>
           </a>
         </li>
   
         <li nz-menu-item nzMatchRouter [nzMatchRouterExact]="true">
-          <a routerLink="/idp/applications">
-            <db-icon icon="folder"></db-icon>
-            <ng-container *ngIf="!(sideBarCollapsed$ | async)">Applications</ng-container>
+          <a routerLink="/clients">
+            <db-icon icon="fa#desktop"></db-icon>
+            <ng-container *ngIf="!(sideBarCollapsed$ | async)">Clients</ng-container>
           </a>
         </li>
   
         <li nz-menu-item nzMatchRouter [nzMatchRouterExact]="true">
-          <a routerLink="/idp/auth-providers">
-            <db-icon icon="folder"></db-icon>
+          <a routerLink="/auth-providers">
+            <db-icon icon="fa#shield-alt"></db-icon>
             <ng-container *ngIf="!(sideBarCollapsed$ | async)">Auth Providers</ng-container>
           </a>
         </li>

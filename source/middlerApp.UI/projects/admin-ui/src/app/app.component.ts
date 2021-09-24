@@ -35,8 +35,13 @@ export class AppComponent {
         //private initService: AppInitializeService, 
         private uiService: AppUIService,
         private authQuery: AuthQuery,
-        private authService: AuthService, 
+        private authService: AuthService,
         public oidcSecurityService: OidcSecurityService) {
+        uiService.SetDefault(ui => {
+            ui.Content.Container = true;
+            ui.Footer.Show = false;
+            ui.Content.Scrollable = false;
+        })
 
         uiService.Set(ui => {
             ui.Header.Title = "Administration"

@@ -110,8 +110,7 @@ export class UsersComponent {
         private modal: DoobModalService,
         public viewContainerRef: ViewContainerRef) {
         uiService.Set(ui => {
-            ui.Header.Title = "IDP / Users"
-            ui.Content.Scrollable = false;
+            ui.Header.Title = "Identity / Users"
             ui.Header.Icon = "fa#user"
         })
     }

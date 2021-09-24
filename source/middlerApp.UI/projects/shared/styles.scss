@@ -475,12 +475,35 @@ nz-tabset {
   }
 
   .pValue {
-    text-shadow: 0 0 1px #000;
-    background-color: #69941817;
+    text-shadow: 0 0 1px #737373;
+    background-color: #ecf0f1;
 }
 
+.ag-row-selected .pValue {
+  background-color: inherit;
+}
+
+.scope-type db-icon {
+  font-size: x-large;
+}
+
+.action-column {
+  background-color: rgba(82,94,118,.0784313725490196);
+}
 
 .ant-form-item-label {
   display: block;
   text-align: initial;
+}
+
+// .ant-tag, .ant-tag a, .ant-tag a:hover {
+//   color: rgb(236 240 241);
+// }
+
+.ant-tag {
+  border: none;
+  background-color: #ecf0f1;
+  line-height: 1.5715;
+  font-size: 11px;
+  border-radius: 1px;
 }

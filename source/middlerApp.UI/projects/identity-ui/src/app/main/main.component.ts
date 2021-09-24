@@ -38,7 +38,7 @@ export class MainComponent {
         public oidcSecurityService: OidcSecurityService) {
 
         uiService.Set(ui => {
-            ui.Header.Title = "Administration"
+            ui.Header.Title = "Identity Management"
             ui.Header.Icon = "setting";
         })
 

@@ -2,9 +2,10 @@ import { IconsImport } from "@admin/icons-import";
 import { CommonModule } from "@angular/common";
 import { NgModule } from "@angular/core";
 import { FaConfig, FaIconLibrary } from "@fortawesome/angular-fontawesome";
-import { GlobalImportsModule } from "./global-imports.module";
+import { GlobalImportsModule } from "../global-imports.module";
 import { MainRoutingModule, RoutingComponents } from "./main-routing.module";
 import { MainComponent } from "./main.component";
+import { IconGridCellComponent } from "./shared/components/icon-cell.component";
 
 @NgModule({
     imports: [
@@ -14,6 +15,7 @@ import { MainComponent } from "./main.component";
     ],
     declarations: [
         MainComponent,
+        IconGridCellComponent,
         ...RoutingComponents
     ]
 })

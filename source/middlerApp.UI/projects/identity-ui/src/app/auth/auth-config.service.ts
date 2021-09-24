@@ -1,5 +1,6 @@
 import { Injectable, InjectionToken } from "@angular/core";
 import { LogLevel, OpenIdConfiguration } from "angular-auth-oidc-client";
+import { CustomStorage } from "./auth-storage";
 
 
 @Injectable({ providedIn: 'root' })
@@ -17,9 +18,15 @@ export class AuthConfigService {
             silentRenew: true,
             useRefreshToken: true,
             renewTimeBeforeTokenExpiresInSeconds: 30,
+            refreshTokenRetryInSeconds: 30,
             logLevel: LogLevel.Warn,
             autoUserInfo: true,
-            secureRoutes: ["_api/", "/_api/"],
+            secureRoutes: ["_api/", "/_api/", "_test", "/_test"],
+            storage: new CustomStorage(),
+            ignoreNonceAfterRefresh: true
+            // customParamsAuthRequest: {
+            //     prompt: 'none'
+            // }
         };
     }
 }

@@ -1,4 +1,4 @@
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
@@ -12,6 +12,9 @@ import { environment } from '../environments/environment';
 import { AppRoutingModule, RoutingComponents } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { AuthConfigModule } from './auth/auth-config.module';
+import { AuthInterceptor } from 'angular-auth-oidc-client';
+import { FaConfig, FaIconLibrary } from '@fortawesome/angular-fontawesome';
+import { IconsImport } from './icons-import';
 
 @NgModule({
   declarations: [
@@ -33,8 +36,17 @@ import { AuthConfigModule } from './auth/auth-config.module';
     {
       provide: NZ_I18N,
       useValue: en_US
-    }
+    },
+    { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true }
   ],
   bootstrap: [AppComponent]
 })
-export class AppModule { }
+export class AppModule {
+
+  constructor(private library: FaIconLibrary, faConfig: FaConfig) {
+
+    var fLib = new IconsImport();
+    fLib.Init(library);
+
+  }
+ }

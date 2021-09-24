@@ -1,7 +1,7 @@
 import { Injectable, InjectionToken } from "@angular/core";
 import { LogLevel, OpenIdConfiguration } from "angular-auth-oidc-client";
 import { AppConfigService } from "../app-config.service";
-
+import { CustomStorage } from './auth-storage'
 
 
 
@@ -22,13 +22,14 @@ export class AuthConfigService {
             postLogoutRedirectUri: window.location.origin,
             clientId: 'middlerUI',
             scope: 'openid profile email offline_access admin_api',
-            responseType: 'id_token token',
+            responseType: 'code',
             silentRenew: true,
             useRefreshToken: true,
             renewTimeBeforeTokenExpiresInSeconds: 30,
             logLevel: LogLevel.Warn,
             autoUserInfo: true,
-            secureRoutes: ["_api/", "/_idp/"]
+            secureRoutes: ["_api/", "/_api/"],
+            storage: new CustomStorage()
         };
     }
 }

@@ -1,3 +1,11 @@
 /* You can add global styles to this file, and also import other style files */
 
 @import "../../shared/styles.scss";
+
+.confirmed {
+    color: black!important
+}
+
+.not-confirmed {
+    color: #adadad!important;
+}
