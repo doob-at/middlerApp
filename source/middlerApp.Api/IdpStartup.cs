@@ -69,7 +69,7 @@ namespace middlerApp.Api
                 });
 
             services.AddResponseCompression();
-            //services.AddSignalARRR();
+            services.AddSignalARRR();
 
             services.AddAutoMapper(config =>
             {
@@ -141,6 +141,7 @@ namespace middlerApp.Api
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllersWithAttribute<IdPControllerAttribute>();
+                endpoints.MapHARRRController<UIHub>("/signalr/ui");
             });
 
             app.UseSpaUI(startUpConfiguration.IdpSettings.WebRoot, "http://127.0.0.1:4300");

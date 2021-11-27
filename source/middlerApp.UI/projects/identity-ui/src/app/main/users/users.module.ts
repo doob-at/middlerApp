@@ -8,6 +8,8 @@ import { ClaimsManagerModule } from "../claims-manager/claims-manager.module";
 import { RolesManagerModule } from "../roles-manager/roles-manager.module";
 import { SetPasswordModalComponent } from "./set-password-modal.component";
 import { UsersRoutingModule, RoutingComponents } from "./users-routing.module";
+import { SimpleListModule } from "../shared/components/simple-list/simple-list.module";
+import { NzButtonModule } from "ng-zorro-antd/button";
 
 
 @NgModule({
@@ -17,7 +19,9 @@ import { UsersRoutingModule, RoutingComponents } from "./users-routing.module";
         ReactiveFormsModule,
         UsersRoutingModule,
         ClaimsManagerModule,
-        RolesManagerModule
+        RolesManagerModule,
+        SimpleListModule,
+        NzButtonModule
     ],
     declarations: [
         ...RoutingComponents,

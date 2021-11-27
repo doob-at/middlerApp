@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using middlerApp.Api.Attributes;
 using middlerApp.Api.Models.Idp;
@@ -15,28 +17,30 @@ namespace middlerApp.Api.Controllers.Admin.Auth
     [ApiController]
     [Route("_api/idp/users")]
     [AdminController]
+    [IdPController]
     [Authorize(Policy = "Admin")]
 
     public class UsersController : Controller
     {
 
         private readonly IMapper _mapper;
-        private readonly ILocalUserService _localUserService;
+        private readonly IMUserService _mUserService;
+        private readonly UserManager<MUser> _userManager;
 
 
-        public UsersController(ILocalUserService localUserService,
-            IMapper mapper)
+        public UsersController(IMapper mapper, IMUserService mUserService, UserManager<MUser> userManager)
         {
             _mapper = mapper;
-            _localUserService = localUserService;
+            _mUserService = mUserService;
+            _userManager = userManager;
         }
 
         [HttpGet]
         public async Task<ActionResult<List<MUserListDto>>> GetAllUsers()
         {
-
-            var users = await _localUserService.GetAllUserListDtosAsync();
-            return Ok(users);
+            var users = await _mUserService.GetAllUsersAsync();
+            var dtos = users.Select(u => _mapper.Map<MUserListDto>(u));
+            return Ok(dtos);
         }
 
         [HttpGet("{id}")]
@@ -48,17 +52,13 @@ namespace middlerApp.Api.Controllers.Admin.Auth
                 return Ok(new MUserDto());
             }
 
-            if (!Guid.TryParse(id, out var guid))
-                return NotFound();
-
-            var user = await _localUserService.GetUserDtoAsync(guid);
-
+            var user = await _userManager.FindByIdAsync(id);
             
             if (user == null)
                 return NotFound();
 
-
-            return Ok(user);
+            var dto = _mapper.Map<MUserDto>(user);
+            return Ok(dto);
 
 
         }
@@ -66,18 +66,21 @@ namespace middlerApp.Api.Controllers.Admin.Auth
         [HttpPost]
         public async Task<IActionResult> CreateUser(MUserDto createUserDto)
         {
-
             var userModel = _mapper.Map<MUser>(createUserDto);
-            userModel.Subject = Guid.NewGuid().ToString();
-
-            await _localUserService.AddUserAsync(userModel);
+            await _userManager.CreateAsync(userModel);
             return Ok();
         }
 
         [HttpPut]
         public async Task<IActionResult> UpdateUser(MUserDto updateUserDto)
         {
-            await _localUserService.UpdateUserAsync(updateUserDto);
+
+            
+            var user = await _userManager.FindByIdAsync(updateUserDto.Id.ToString());
+
+            user = _mapper.Map(updateUserDto, user);
+            
+            await _userManager.UpdateAsync(user);
             return Ok();
         }
 
@@ -85,7 +88,7 @@ namespace middlerApp.Api.Controllers.Admin.Auth
         public async Task<IActionResult> DeleteUser(Guid id)
         {
 
-            await _localUserService.DeleteUser(id);
+            await _mUserService.DeleteUserAsync(id);
             return NoContent();
         }
 
@@ -93,7 +96,7 @@ namespace middlerApp.Api.Controllers.Admin.Auth
         public async Task<IActionResult> DeleteUsers([FromBody] List<Guid> ids)
         {
 
-            await _localUserService.DeleteUser(ids.ToArray());
+            await _mUserService.DeleteUserAsync(ids.ToArray());
             return NoContent();
         }
 
@@ -101,14 +104,23 @@ namespace middlerApp.Api.Controllers.Admin.Auth
         [HttpPost("{id}/password")]
         public async Task<IActionResult> SetPassword(Guid id, SetPasswordDto passwordDto)
         {
-            await _localUserService.SetPassword(id, passwordDto.Password);
-            return Ok();
+            var user = await _userManager.FindByIdAsync(id.ToString());
+            var passwordToken = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var result = await _userManager.ResetPasswordAsync(user, passwordToken, passwordDto.Password);
+
+            if (result.Succeeded)
+            {
+                return Ok();
+            }
+
+            return BadRequest(result.Errors);
         }
 
         [HttpDelete("{id}/password")]
         public async Task<IActionResult> ClearPassword(Guid id)
         {
-            await _localUserService.ClearPassword(id);
+            var user = await _userManager.FindByIdAsync(id.ToString());
+            await _userManager.RemovePasswordAsync(user);
             return Ok();
         }
     }

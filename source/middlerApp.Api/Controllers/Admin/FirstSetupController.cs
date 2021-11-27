@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using middlerApp.Api.Attributes;
 using middlerApp.Api.Models;
@@ -17,12 +18,13 @@ namespace middlerApp.Api.Controllers.Admin
     {
 
         private readonly DefaultResourcesManager _defaultResourcesManager;
-        private readonly ILocalUserService _localUserService;
+        private readonly UserManager<MUser> _userManager;
 
-        public FirstSetupController(DefaultResourcesManager defaultResourcesManager, ILocalUserService localUserService)
+
+        public FirstSetupController(DefaultResourcesManager defaultResourcesManager, UserManager<MUser> userManager)
         {
             _defaultResourcesManager = defaultResourcesManager;
-            _localUserService = localUserService;
+            _userManager = userManager;
         }
 
 
@@ -52,11 +54,17 @@ namespace middlerApp.Api.Controllers.Admin
             user.Roles.Add(adminRole);
             user.Active = true;
 
-            await _localUserService.AddUserAsync(user, firstSetupModel.Password);
+            var result = await _userManager.CreateAsync(user, firstSetupModel.Password);
 
+            if (result.Succeeded)
+            {
+                return Ok();
+            }
+
+            return BadRequest(result.Errors);
             //await _defaultResourcesManager.EnsureAdminClientExists(firstSetupModel.RedirectUri);
 
-            return Ok();
+
         }
     }
 

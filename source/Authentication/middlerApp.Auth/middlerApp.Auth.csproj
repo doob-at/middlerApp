@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
@@ -6,12 +6,13 @@
 
 	<ItemGroup>
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.1.1" />
-    <PackageReference Include="doob.Reflectensions.CommonExtensions" Version="6.3.4" />
-    <PackageReference Include="doob.Reflectensions.Json" Version="6.3.4" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.Negotiate" Version="5.0.9" />
+    <PackageReference Include="doob.Reflectensions.CommonExtensions" Version="6.3.5" />
+    <PackageReference Include="doob.Reflectensions.Json" Version="6.3.5" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Negotiate" Version="5.0.10" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="5.0.10" />
 		<PackageReference Include="OpenIddict.AspNetCore" Version="3.1.1" />
 		<PackageReference Include="OpenIddict.EntityFrameworkCore" Version="3.1.1" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="5.0.9" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="5.0.10" />
 	</ItemGroup>
 
 	<ItemGroup>

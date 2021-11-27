@@ -40,6 +40,7 @@ export class RolesComponent {
             this.contextMenu = this.overlay.OpenContextMenu(ev.event as MouseEvent, this.itemsContextMenu, this.viewContainerRef, vContext)
         })
         .OnViewPortContextMenu((ev, api) => {
+            api.deselectAll();
             let vContext = new DefaultContextMenuContext(api, ev)
             this.contextMenu = this.overlay.OpenContextMenu(ev, this.itemsContextMenu, this.viewContainerRef, vContext)
         })
@@ -48,7 +49,7 @@ export class RolesComponent {
             //console.log("double Clicked", el)
 
         })
-        .StopEditingWhenGridLosesFocus()
+        .StopEditingWhenCellsLoseFocus()
         .OnGridSizeChange(ev => ev.api.sizeColumnsToFit())
         .OnViewPortClick((ev, api) => {
             api.deselectAll();
@@ -72,7 +73,7 @@ export class RolesComponent {
         private rolesQuery: RolesQuery
     ) {
         uiService.Set(ui => {
-            ui.Header.Title = "IDP / Roles"
+            ui.Header.Title = "Roles"
             ui.Content.Scrollable = false;
             ui.Header.Icon = "fa#user-tag"
         })

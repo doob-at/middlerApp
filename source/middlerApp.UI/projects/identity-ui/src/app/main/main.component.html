@@ -32,45 +32,39 @@
   
       <ul nz-menu nzTheme="light" nzMode="inline">
   
-        <li nz-menu-item nzMatchRouter>
-          <a routerLink="/test">
-            <db-icon icon="fa#fas|stream"></db-icon>
-            <ng-container *ngIf="!(sideBarCollapsed$ | async)">Test</ng-container>
-          </a>
-        </li>
         <li nz-menu-item nzMatchRouter [nzMatchRouterExact]="true">
-          <a routerLink="/global-variables">
-            <db-icon icon="folder"></db-icon>
-            <ng-container *ngIf="!(sideBarCollapsed$ | async)">Global Variables</ng-container>
+          <a routerLink="/" >
+            <db-icon icon="dashboard"></db-icon>
+            <ng-container *ngIf="!(sideBarCollapsed$ | async)">Dashboard</ng-container>
           </a>
         </li>
-     
+             
         <div class="menu-header-item">
           Identity Management
         </div>
   
-        <li nz-menu-item nzMatchRouter [nzMatchRouterExact]="true">
+        <li nz-menu-item nzMatchRouter [nzMatchRouterExact]="false">
           <a routerLink="/users">
             <db-icon icon="fa#user"></db-icon>
             <ng-container *ngIf="!(sideBarCollapsed$ | async)">Users</ng-container>
           </a>
         </li>
   
-        <li nz-menu-item nzMatchRouter [nzMatchRouterExact]="true">
+        <li nz-menu-item nzMatchRouter [nzMatchRouterExact]="false">
           <a routerLink="/roles">
             <db-icon icon="fa#user-tag"></db-icon>
             <ng-container *ngIf="!(sideBarCollapsed$ | async)">Roles</ng-container>
           </a>
         </li>
   
-        <li nz-menu-item nzMatchRouter [nzMatchRouterExact]="true">
+        <li nz-menu-item nzMatchRouter [nzMatchRouterExact]="false">
           <a routerLink="/clients">
             <db-icon icon="fa#desktop"></db-icon>
             <ng-container *ngIf="!(sideBarCollapsed$ | async)">Clients</ng-container>
           </a>
         </li>
   
-        <li nz-menu-item nzMatchRouter [nzMatchRouterExact]="true">
+        <li nz-menu-item nzMatchRouter [nzMatchRouterExact]="false">
           <a routerLink="/auth-providers">
             <db-icon icon="fa#shield-alt"></db-icon>
             <ng-container *ngIf="!(sideBarCollapsed$ | async)">Auth Providers</ng-container>

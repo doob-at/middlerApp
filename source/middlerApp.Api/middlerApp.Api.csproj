@@ -8,24 +8,36 @@
     <PackageReference Include="AutoMapper" Version="10.1.1" />
     <PackageReference Include="AutoMapper.Collection" Version="7.0.1" />
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.1.1" />
-    <PackageReference Include="doob.Reflectensions.Json" Version="6.3.4" />
-    <PackageReference Include="doob.SignalARRR.Server" Version="2.1.1-beta0018" />
+    <PackageReference Include="doob.middler.Action.Scripting" Version="0.1.0-beta0004" />
+    <PackageReference Include="doob.Reflectensions.Json" Version="6.3.5" />
+    <PackageReference Include="doob.Scripter.Engine.TypeScript" Version="0.1.0-beta0042" />
+    <PackageReference Include="doob.SignalARRR.Server" Version="3.0.3" />
     <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="5.0.1" />
     <PackageReference Include="Serilog.AspNetCore" Version="4.1.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.Negotiate" Version="5.0.9" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="5.0.9" />
-    <PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.NewtonsoftJson" Version="5.0.9" />
-    <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="5.0.9" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Negotiate" Version="5.0.10" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="5.0.10" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.NewtonsoftJson" Version="5.0.10" />
+    <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="5.0.10" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Authentication\middlerApp.Auth\middlerApp.Auth.csproj" />
     <ProjectReference Include="..\DataAccess\middlerApp.DataAccess.Repository\middlerApp.DataAccess.csproj" />
+    <ProjectReference Include="..\JintTsDefinition\JintTsDefinition.csproj" />
     <ProjectReference Include="..\middlerApp.Ldap\middlerApp.Ldap.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <None Update="localhost.pfx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="TsDefinitions\global.d.ts">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="TsDefinitions\lib.es2015.core.d.ts">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="TsDefinitions\lib.es5.d.ts">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

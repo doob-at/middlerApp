@@ -41,7 +41,7 @@ namespace middlerApp.Auth.Resolvers
                 return store;
             }
 
-            var type = _cache.GetOrAdd(typeof(TApplication), key => typeof(AuthApplicationStore));
+            var type = _cache.GetOrAdd(typeof(TApplication), key => typeof(ClientsStore));
 
             return (IOpenIddictApplicationStore<TApplication>)_provider.GetRequiredService(type);
         }

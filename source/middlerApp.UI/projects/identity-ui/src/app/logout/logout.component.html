@@ -1,0 +1,14 @@
+<nz-result
+      nzStatus="success"
+      nzTitle="Would you like to logout from IdentityServer?"
+      [nzIcon]="cIcon"
+    >
+      <div nz-result-extra>
+        <button nz-button nzType="primary" (click)="Cancel()">No</button>
+        <button nz-button (click)="Logout()">Yes</button>
+      </div>
+    </nz-result>
+
+<ng-template #cIcon>
+  <i nz-icon nzType="question-circle" nzTheme="fill"></i>
+</ng-template>

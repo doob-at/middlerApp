@@ -17,6 +17,7 @@ namespace middlerApp.Api.Controllers.Admin.Auth
     [ApiController]
     [Route("_api/idp/auth-provider")]
     [AdminController]
+    [IdPController]
     [Authorize(Policy = "Admin")]
     public class AuthProviderController: Controller
     {

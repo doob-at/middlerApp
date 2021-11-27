@@ -7,7 +7,7 @@
   <ItemGroup>
     <PackageReference Include="doob.middler" Version="0.1.0-beta0004" />
     <PackageReference Include="System.Reactive.Linq" Version="5.0.0" />
-    <PackageReference Include="doob.Reflectensions.CommonExtensions" Version="6.3.4" />
+    <PackageReference Include="doob.Reflectensions.CommonExtensions" Version="6.3.5" />
   </ItemGroup>
 
   <ItemGroup>

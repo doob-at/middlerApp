@@ -43,7 +43,7 @@ export class AuthApplicationsComponent implements OnInit {
             let vContext = new DefaultContextMenuContext(api, ev)
             this.contextMenu = this.overlay.OpenContextMenu(ev, this.itemsContextMenu, this.viewContainerRef, vContext)
         })
-        .StopEditingWhenGridLosesFocus()
+        .StopEditingWhenCellsLoseFocus()
         .OnGridSizeChange(ev => ev.api.sizeColumnsToFit())
         .OnViewPortClick((ev, api) => {
             api.deselectAll();

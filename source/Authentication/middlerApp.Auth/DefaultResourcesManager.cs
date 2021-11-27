@@ -52,7 +52,7 @@ namespace middlerApp.Auth
 
             if (adminClient != null)
             {
-                UpdateAdminClient(adminClient);
+                UpdateAdminClient(adminClient.ClientId);
                 return;
             }
 
@@ -64,6 +64,7 @@ namespace middlerApp.Auth
             client.ClientId = "middlerUI";
             client.DisplayName = "middler UI";
             client.Type = OpenIddictConstants.ClientTypes.Public;
+            
             client.Permissions = Json.Converter.ToJson(new HashSet<string>()
             {
                 OpenIddictConstants.Permissions.Endpoints.Authorization,
@@ -81,11 +82,17 @@ namespace middlerApp.Auth
                 OpenIddictConstants.Permissions.Scopes.Profile,
                 OpenIddictConstants.Permissions.Scopes.Roles,
                 OpenIddictConstants.Permissions.Prefixes.Scope + "admin_api"
+                
             });
-            
-            SetAdminRedirectUris(client);
+            client.ConsentType = OpenIddictConstants.ConsentTypes.Implicit;
+            client.AccessTokenLifeTime = 3600; // 3600seconds = 1hour
+
            
             await _authApplicationManager.CreateAsync(client);
+
+            
+            SetAdminRedirectUris(client.ClientId);
+            SetAdminPostLogoutRedirectUris(client.ClientId);
             //await DbContext.Clients.AddAsync(client);
             //await DbContext.SaveChangesAsync();
 
@@ -189,15 +196,17 @@ namespace middlerApp.Auth
         //    await DbContext.SaveChangesAsync();
 
         //}
-        private void UpdateAdminClient(Client client)
+        private void UpdateAdminClient(string clientId)
         {
-            SetAdminRedirectUris(client);
+            SetAdminRedirectUris(clientId);
+            SetAdminPostLogoutRedirectUris(clientId);
             DbContext.SaveChanges();
         }
 
-        private void UpdateIdpClient(Client client)
+        private void UpdateIdpClient(string clientId)
         {
-            SetIdpRedirectUris(client);
+            SetIdpRedirectUris(clientId);
+            SetIdpPostLogoutRedirectUris(clientId);
             DbContext.SaveChanges();
         }
 
@@ -212,7 +221,7 @@ namespace middlerApp.Auth
 
             if (adminClient != null)
             {
-                UpdateIdpClient(adminClient);
+                UpdateIdpClient(adminClient.ClientId);
                 return;
             }
 
@@ -240,10 +249,25 @@ namespace middlerApp.Auth
                 OpenIddictConstants.Permissions.Scopes.Roles,
                 OpenIddictConstants.Permissions.Prefixes.Scope + "idp_api"
             });
+
+            client.Requirements = Json.Converter.ToJson(new HashSet<string>()
+            {
+                OpenIddictConstants.Requirements.Features.ProofKeyForCodeExchange
+            });
+
+            client.ConsentType = OpenIddictConstants.ConsentTypes.Implicit;
+            client.AccessTokenLifeTime = 3600; // 3600seconds = 1hour
+
             
-            SetIdpRedirectUris(client);
            
             await _authApplicationManager.CreateAsync(client);
+
+            //var cl = await DbContext.Clients
+            //    .Include(cl => cl.RedirectUris)
+            //    .Include(cl => cl.PostLogoutRedirectUris)
+            //    .FirstOrDefaultAsync(cl => cl.ClientId == client.ClientId);
+            SetIdpRedirectUris(client.ClientId);
+            SetIdpPostLogoutRedirectUris(client.ClientId);
             //await DbContext.Clients.AddAsync(client);
             //await DbContext.SaveChangesAsync();
 
@@ -297,7 +321,7 @@ namespace middlerApp.Auth
             {
                 "identityApi"
             });
-
+            
             await _authScopeManager.CreateAsync(newScope);
             //await DbContext.AuthScopes.AddAsync(newScope);
             //await DbContext.SaveChangesAsync();
@@ -347,8 +371,13 @@ namespace middlerApp.Auth
         //    }
         //}
 
-        private void SetAdminRedirectUris(Client client)
+        private void SetAdminRedirectUris(string clientId)
         {
+            var client = DbContext.Clients
+                .Include(cl => cl.RedirectUris)
+                .Include(cl => cl.PostLogoutRedirectUris)
+                .FirstOrDefault(cl => cl.ClientId == clientId);
+
             var uris = client.RedirectUris.Select(u => u.RedirectUri).ToList();
 
             foreach (var uri in _idpConfiguration.AdminUIRedirectUris)
@@ -377,8 +406,38 @@ namespace middlerApp.Auth
 
         }
 
-        private void SetIdpRedirectUris(Client client)
+        private void SetAdminPostLogoutRedirectUris(string clientId)
         {
+            var client = DbContext.Clients
+                .Include(cl => cl.RedirectUris)
+                .Include(cl => cl.PostLogoutRedirectUris)
+                .FirstOrDefault(cl => cl.ClientId == clientId);
+
+            var uris = client.PostLogoutRedirectUris.Select(u => u.PostLogoutRedirectUri).ToList();
+            
+            foreach (var uri in _idpConfiguration.AdminUIPostLogoutUris)
+            {
+                if (!uris.Contains(uri))
+                {
+                    client.PostLogoutRedirectUris.Add(new ClientPostLogoutRedirectUri()
+                    {
+                        ClientId = client.Id,
+                        PostLogoutRedirectUri = uri
+                    });
+                }
+            }
+
+        }
+
+
+        private void SetIdpRedirectUris(string clientId)
+        {
+            
+            var client = DbContext.Clients
+                .Include(cl => cl.RedirectUris)
+                .Include(cl => cl.PostLogoutRedirectUris)
+                .FirstOrDefault(cl => cl.ClientId == clientId);
+
             var uris = client.RedirectUris.Select(u => u.RedirectUri).ToList();
 
             foreach (var uri in _idpConfiguration.IdpUIRedirectUris)
@@ -392,8 +451,20 @@ namespace middlerApp.Auth
                     });
                 }
             }
+            
+        }
 
-            foreach (var uri in _idpConfiguration.IdpUIRedirectUris)
+
+        private void SetIdpPostLogoutRedirectUris(string clientId)
+        {
+            var client = DbContext.Clients
+                .Include(cl => cl.RedirectUris)
+                .Include(cl => cl.PostLogoutRedirectUris)
+                .FirstOrDefault(cl => cl.ClientId == clientId);
+
+            var uris = client.PostLogoutRedirectUris.Select(u => u.PostLogoutRedirectUri).ToList();
+            
+            foreach (var uri in _idpConfiguration.IdpUIPostLogoutUris)
             {
                 if (!uris.Contains(uri))
                 {

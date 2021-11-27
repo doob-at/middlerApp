@@ -1,6 +1,6 @@
 import { FaIconLibrary } from '@fortawesome/angular-fontawesome';
 import { faAddressCard, faAngleDoubleRight, faChevronLeft, faChevronRight, faCube, faCubes, faDesktop, 
-  faEllipsisV, faStream, faToggleOff, faToggleOn, faUser, faUsers, faUsersCog, faUserTag, faKey, faShieldAlt } from '@fortawesome/free-solid-svg-icons';
+  faEllipsisV, faStream, faToggleOff, faToggleOn, faUser, faUsers, faUsersCog, faUserTag, faKey, faShieldAlt, faPlusSquare as fasPlusSquare, faPlayCircle as fasPlayCircle } from '@fortawesome/free-solid-svg-icons';
 import { faAddressCard as farAddressCard, faPlayCircle, faPlusSquare, faStopCircle } from '@fortawesome/free-regular-svg-icons';
 import {
   DashboardOutline, FolderOutline, SettingOutline, FieldBinaryOutline, DeleteOutline,
@@ -33,7 +33,9 @@ export class IconsImport {
       faChevronRight,
       faKey,
       faStopCircle,
-      faShieldAlt
+      faShieldAlt,
+      fasPlusSquare,
+      fasPlayCircle
     )
 
   }

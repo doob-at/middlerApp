@@ -6,6 +6,10 @@
     color: black!important
 }
 
-.not-confirmed {
+.not-confirmed .ag-cell {
     color: #adadad!important;
 }
+
+.not-confirmed .ag-cell {
+    opacity: .5;
+  }

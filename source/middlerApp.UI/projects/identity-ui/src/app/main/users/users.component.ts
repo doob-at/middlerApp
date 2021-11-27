@@ -27,10 +27,6 @@ export class UsersComponent {
             
             return users.map(u => {
 
-                if(u.UserName == "bwindisc"){
-                //    console.log(JSON.stringify(u, null, 4) )
-                }
-                
                 let userLogins = u.Logins ?? [];
 
                 if (u.HasPassword) {
@@ -39,15 +35,10 @@ export class UsersComponent {
                     userLogins = userLogins
                 }
 
-                
-                let nu = {
+                return {
                     ...u,
                     Logins: userLogins
                 }
-                if(u.UserName == "bwindisc"){
-                // console.log(JSON.stringify(nu, null, 4));
-                }
-                return nu;
             })
         })
     )
@@ -88,13 +79,14 @@ export class UsersComponent {
             this.contextMenu = this.overlay.OpenContextMenu(ev.event as MouseEvent, this.itemsContextMenu, this.viewContainerRef, vContext)
         })
         .OnViewPortContextMenu((ev, api) => {
+            api.deselectAll();
             let vContext = new DefaultContextMenuContext(api, ev)
             this.contextMenu = this.overlay.OpenContextMenu(ev, this.itemsContextMenu, this.viewContainerRef, vContext)
         })
         .OnRowDoubleClicked(el => {
             this.EditUser(el.node.data);
         })
-        .StopEditingWhenGridLosesFocus()
+        .StopEditingWhenCellsLoseFocus()
         .OnGridSizeChange(ev => ev.api.sizeColumnsToFit())
         .OnViewPortClick((ev, api) => {
             api.deselectAll();

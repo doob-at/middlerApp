@@ -38,6 +38,7 @@ export class AuthProvidersComponent {
             this.contextMenu = this.overlay.OpenContextMenu(ev.event as MouseEvent, this.itemsContextMenu, this.viewContainerRef, vContext)
         })
         .OnViewPortContextMenu((ev, api) => {
+            api.deselectAll();
             let vContext = new DefaultContextMenuContext(api, ev)
             this.contextMenu = this.overlay.OpenContextMenu(ev, this.itemsContextMenu, this.viewContainerRef, vContext)
         })
@@ -46,7 +47,7 @@ export class AuthProvidersComponent {
             //console.log("double Clicked", el)
 
         })
-        .StopEditingWhenGridLosesFocus()
+        .StopEditingWhenCellsLoseFocus()
         .OnGridSizeChange(ev => ev.api.sizeColumnsToFit())
         .OnViewPortClick((ev, api) => {
             api.deselectAll();

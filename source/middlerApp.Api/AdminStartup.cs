@@ -10,9 +10,18 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using AutoMapper.EquivalencyExpression;
+using doob.middler;
+using doob.middler.Action.Scripting;
+using doob.middler.Action.Scripting.Models;
+using doob.middler.Common.SharedModels.Enums;
+using doob.Reflectensions.Common;
+using doob.Scripter;
+using doob.Scripter.Engine.Javascript;
+using doob.Scripter.Engine.TypeScript;
 using doob.SignalARRR.Server;
 using doob.SignalARRR.Server.ExtensionMethods;
 using doob.SignalARRR.Server.JsonConverters;
+using Jint;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using middlerApp.Api.Attributes;
 using middlerApp.Api.Converters;
@@ -20,12 +29,16 @@ using middlerApp.Api.ExtensionMethods;
 using middlerApp.Api.Hubs;
 using middlerApp.Api.Middleware;
 using middlerApp.Api.Providers;
+using middlerApp.API.TsDefinitions;
 using middlerApp.Auth;
+using middlerApp.DataAccess;
+using middlerApp.DataAccess.ExtensionMethods;
 using middlerApp.Events;
 using NamedServices.Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using OpenIddict.Validation.AspNetCore;
+using IScripterContextExtensions = doob.Scripter.Engine.Javascript.IScripterContextExtensions;
 
 namespace middlerApp.Api
 {
@@ -65,7 +78,6 @@ namespace middlerApp.Api
                     options.PayloadSerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
                 });
 
-            services.AddResponseCompression();
             services.AddSignalARRR();
 
             services.AddAutoMapper(config =>
@@ -75,45 +87,51 @@ namespace middlerApp.Api
 
             services.AddResponseCompression();
 
-           
             services.AddSingleton<DataEventDispatcher>();
 
+           services.AddAdminServices(sConfig.DbSettings.Provider, sConfig.DbSettings.ConnectionString);
+           services.AddScripter(context =>
+                   context
+                       .AddJavaScriptEngine()
+                       .AddTypeScriptEngine()
+                       //.AddPowerShellCoreEngine()
+                       //.AddModulePlugins()
+                       .AddScripterModule<EndpointModule>()
+               //.AddScripterModule<GlobalVariablesModule>()
+           );
 
-            services.AddAuthentication(options =>
-            {
-                options.DefaultScheme = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme;
-            });
+           //services.AddScoped<Options>(provider =>
+           //{
+           //    var opts = new Options();
+           //    //opts.AddExtensionMethods(typeof(CustomStringExtensions));
+           //    opts.AddExtensionMethods(typeof(StringExtensions));
+               
+           //    opts.CatchClrExceptions();
+           //    opts.DebugMode();
 
-            // Register the OpenIddict validation components.
-            services.AddOpenIddict()
-                .AddValidation(options =>
-                {
-                    // Note: the validation handler uses OpenID Connect discovery
-                    // to retrieve the address of the introspection endpoint.
-                    options.SetIssuer("https://localhost:4445/");
-                    options.AddAudiences("middlerApi");
+           //    var JintAssemblies = new List<Assembly>();
+           //    JintAssemblies.AddRange(AppDomain.CurrentDomain.GetAssemblies());
+           //    //JintAssemblies.AddRange(IScripterContextExtensions.assembliesForJint);
 
-                    // Configure the validation handler to use introspection and register the client
-                    // credentials used when communicating with the remote introspection endpoint.
-                    options.UseIntrospection()
-                        .SetClientId("middlerApi")
-                        .SetClientSecret("846B62D0-DEF9-4215-A99D-86E6B8DAB342");
+           //    opts.AllowClr(JintAssemblies.ToArray());
+                
+           //    return opts;
+           //});
 
-                    // Register the System.Net.Http integration.
-                    options.UseSystemNetHttp();
+           services.AddMiddler(
+               options =>
+               options
+                   //.AddUrlRedirectAction()
+                   //.AddUrlRewriteAction()
+                   .AddScriptingAction()
+                   .SetDefaultAccessMode(AccessMode.Ignore)
 
-                    // Register the ASP.NET Core host.
-                    options.UseAspNetCore();
-                });
 
-            services.AddAuthorization((options) =>
-            {
-                options.AddPolicy("Admin", policy =>
-                {
-                    policy.RequireAuthenticatedUser();
-                    policy.RequireRole("Administrators");
-                });
-            });
+           );
+
+           services.AddSingleton<DataEventDispatcher>();
+           services.AddMiddlerServices(sConfig.DbSettings.Provider, sConfig.DbSettings.ConnectionString);
+           services.AddSingleton<TsDefinitionService>();
 
         }
 
@@ -155,68 +173,5 @@ namespace middlerApp.Api
           
         }
 
-        //public void ConfigureAdministration(IApplicationBuilder app, StartUpConfiguration startUpConfiguration)
-        //{
-        //    app.AddLogging();
-            
-        //    app.UseRouting();
-            
-        //    //app.UseSignalARRRAccessTokenValidation();
-        //    app.UseAuthentication();
-        //    app.UseAuthorization();
-
-
-        //    app.UseEnrichAppConfigMiddleware();
-
-        //    app.UseEndpoints(endpoints =>
-        //    {
-                
-        //        endpoints.MapControllersWithAttribute<AdminControllerAttribute>();
-        //        endpoints.MapHub<UIHub>("/signalr/ui");
-        //        //endpoints.MapHARRRController<RemoteAgentHub>("/signalr/ra");
-
-        //    });
-
-        //    app.UseSpaUI(startUpConfiguration.AdminSettings.WebRoot, "http://127.0.0.1:4200");
-        //}
-
-        //public void ConfigureIDP(IApplicationBuilder app, StartUpConfiguration startUpConfiguration)
-        //{
-        //    app.AddLogging();
-
-        //    app.UseCors(builder => builder
-        //        .AllowAnyOrigin()
-        //        .AllowAnyHeader()
-        //        .AllowAnyMethod());
-        //    app.UseRouting();
-        //    app.UseAuthentication();
-        //    app.UseAuthorization();
-
-            
-
-        //    app.UseEndpoints(endpoints =>
-        //    {
-        //        endpoints.MapControllersWithAttribute<IdPControllerAttribute>();
-
-        //    });
-
-        //    app.UseSpaUI(startUpConfiguration.IdpSettings.WebRoot, "http://127.0.0.1:4300");
-        //}
-
-        //public void ConfigureMiddler(IApplicationBuilder app)
-        //{
-        //    app.AddLogging();
-
-        //    app.UseRouting();
-        //    app.UseAuthentication();
-        //    app.UseAuthorization();
-
-
-
-        //    app.UseMiddler(map =>
-        //    {
-        //        map.AddRepo<EFCoreMiddlerRepository>();
-        //    });
-        //}
     }
 }

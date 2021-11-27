@@ -23,12 +23,12 @@ using OpenIddict.Abstractions;
 
 namespace middlerApp.Auth.Stores
 {
-    public class AuthApplicationStore : IOpenIddictApplicationStore<Client>
+    public class ClientsStore : IOpenIddictApplicationStore<Client>
     {
         private readonly IMemoryCache _cache;
         private readonly AuthDbContext _dbContext;
 
-        public AuthApplicationStore(IMemoryCache cache, AuthDbContext dbContext)
+        public ClientsStore(IMemoryCache cache, AuthDbContext dbContext)
         {
             _cache = cache;
             _dbContext = dbContext;
@@ -187,7 +187,9 @@ namespace middlerApp.Auth.Stores
 
             var key = ConvertIdentifierFromString<Guid>(identifier);
 
-            return await(from client in _dbContext.Clients.Include(x => x.RedirectUris).AsTracking()
+            return await(from client in _dbContext.Clients
+                    .Include(x => x.RedirectUris)
+                    .Include(x => x.PostLogoutRedirectUris).AsTracking()
                 where client.Id!.Equals(key)
                 select client).FirstOrDefaultAsync(cancellationToken);
         }
@@ -209,7 +211,7 @@ namespace middlerApp.Auth.Stores
 
             async IAsyncEnumerable<Client> ExecuteAsync([EnumeratorCancellation] CancellationToken cancellationToken)
             {
-                var applications = (from client in _dbContext.Clients.Include(x => x.RedirectUris).AsTracking()
+                var applications = (from client in _dbContext.Clients.Include(x => x.PostLogoutRedirectUris).AsTracking()
                     where client.PostLogoutRedirectUris.Any(r => r.PostLogoutRedirectUri == address)//.Contains(address)
                     select client).AsAsyncEnumerable(cancellationToken);
 

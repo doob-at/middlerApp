@@ -90,5 +90,7 @@ namespace middlerApp.Auth.Entities
         public virtual string? Type { get; set; }
         public int? AccessTokenLifeTime { get; set; }
         public int? RefreshTokenLifeTime { get; set; }
+
+        public string? Description { get; set; }
     }
 }

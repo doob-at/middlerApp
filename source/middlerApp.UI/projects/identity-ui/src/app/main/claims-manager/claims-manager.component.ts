@@ -95,7 +95,7 @@ export class ClaimsManagerComponent implements ControlValueAccessor, OnInit {
             //console.log("double Clicked", el)
 
         })
-        .StopEditingWhenGridLosesFocus()
+        .StopEditingWhenCellsLoseFocus()
         .OnGridSizeChange(ev => ev.api.sizeColumnsToFit())
         .OnViewPortClick((ev, api) => {
             api.deselectAll();

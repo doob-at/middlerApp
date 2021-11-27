@@ -2,12 +2,17 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { MainComponent } from './main.component';
 import { TestComponent } from '../test/test.component';
+import { DashboardComponent } from './dashboard/dashboard.component';
 
 const routes: Routes = [
   {
     path: '',
     component: MainComponent,
     children: [
+      {
+        path: '',
+        component: DashboardComponent
+      },
       {
         path: 'test',
         component: TestComponent
@@ -36,7 +41,8 @@ const routes: Routes = [
 
 export const RoutingComponents = [
   MainComponent,
-  TestComponent
+  TestComponent,
+  DashboardComponent
 ]
 
 @NgModule({

@@ -13,6 +13,7 @@ namespace middlerApp.Api.Controllers.Admin.Auth
     [ApiController]
     [Route("_api/idp/roles")]
     [AdminController]
+    [IdPController]
     [Authorize(Policy = "Admin")]
     public class RolesController : Controller
     {

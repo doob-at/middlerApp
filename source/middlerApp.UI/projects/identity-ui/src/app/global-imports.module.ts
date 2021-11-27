@@ -33,6 +33,7 @@ import { NzResizableModule } from 'ng-zorro-antd/resizable';
 import { AgGridModule } from "@ag-grid-community/angular";
 import { DoobGridModule } from "@doob-ng/grid";
 import { DoobEditorModule } from "@doob-ng/editor";
+import { NzResultModule } from 'ng-zorro-antd/result';
 
 const GlobalModules = [
     NzFormModule,
@@ -59,6 +60,7 @@ const GlobalModules = [
     NzElementPatchModule,
     NzDividerModule,
     NzResizableModule,
+    NzResultModule,
     
     DoobCoreModule,
     DoobAntdExtensionsModule,

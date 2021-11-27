@@ -14,7 +14,7 @@ namespace middlerApp.DataAccess.Sqlite.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "5.0.7");
+                .HasAnnotation("ProductVersion", "5.0.10");
 
             modelBuilder.Entity("middlerApp.DataAccess.Entities.Models.EndpointActionEntity", b =>
                 {

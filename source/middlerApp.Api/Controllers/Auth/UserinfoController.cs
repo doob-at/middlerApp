@@ -5,8 +5,10 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using middlerApp.Api.Attributes;
+using middlerApp.Auth.Entities;
 using middlerApp.Auth.Services;
 using OpenIddict.Abstractions;
 using OpenIddict.Server.AspNetCore;
@@ -16,12 +18,13 @@ namespace middlerApp.Api.Controllers.Auth
     [IdPController]
     public class UserinfoController : Controller
     {
-        private readonly ILocalUserService _localUserService;
+        private readonly UserManager<MUser> _userManager;
 
 
-        public UserinfoController(ILocalUserService localUserService)
+        public UserinfoController(UserManager<MUser> userManager)
         {
-            _localUserService = localUserService;
+            _userManager = userManager;
+            
         }
 
         [Authorize(AuthenticationSchemes = OpenIddictServerAspNetCoreDefaults.AuthenticationScheme)]
@@ -32,7 +35,7 @@ namespace middlerApp.Api.Controllers.Auth
             //var claimsPrincipal =
             //    (await HttpContext.AuthenticateAsync(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme))
             //    .Principal;
-            var user = await _localUserService.GetUserAsync(User);
+            var user = await _userManager.GetUserAsync(User);
             if (user is null)
             {
                 return Challenge(

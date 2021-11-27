@@ -16,7 +16,7 @@ namespace middlerApp.Auth.Postgres.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("Relational:MaxIdentifierLength", 63)
-                .HasAnnotation("ProductVersion", "5.0.7")
+                .HasAnnotation("ProductVersion", "5.0.10")
                 .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
             modelBuilder.Entity("MRoleMUser", b =>
@@ -207,6 +207,9 @@ namespace middlerApp.Auth.Postgres.Migrations
                     b.Property<string>("ConsentType")
                         .HasColumnType("text");
 
+                    b.Property<string>("Description")
+                        .HasColumnType("text");
+
                     b.Property<string>("DisplayName")
                         .HasColumnType("text");
 
@@ -313,6 +316,9 @@ namespace middlerApp.Auth.Postgres.Migrations
                     b.Property<bool>("BuiltIn")
                         .HasColumnType("boolean");
 
+                    b.Property<string>("ConcurrencyStamp")
+                        .HasColumnType("text");
+
                     b.Property<string>("Description")
                         .HasColumnType("text");
 
@@ -320,6 +326,9 @@ namespace middlerApp.Auth.Postgres.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("Name")
+                        .HasColumnType("text");
+
+                    b.Property<string>("NormalizedName")
                         .HasColumnType("text");
 
                     b.HasKey("Id");
@@ -333,16 +342,17 @@ namespace middlerApp.Auth.Postgres.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<int>("AccessFailedCount")
+                        .HasColumnType("integer");
+
                     b.Property<bool>("Active")
                         .HasColumnType("boolean");
 
                     b.Property<string>("ConcurrencyStamp")
-                        .IsConcurrencyToken()
                         .HasColumnType("text");
 
                     b.Property<string>("Email")
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
+                        .HasColumnType("text");
 
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("boolean");
@@ -359,9 +369,21 @@ namespace middlerApp.Auth.Postgres.Migrations
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("boolean");
 
+                    b.Property<DateTimeOffset?>("LockoutEnd")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("NormalizedEmail")
+                        .HasColumnType("text");
+
+                    b.Property<string>("NormalizedUserName")
+                        .HasColumnType("text");
+
                     b.Property<string>("Password")
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
+
+                    b.Property<string>("PasswordHash")
+                        .HasColumnType("text");
 
                     b.Property<string>("PhoneNumber")
                         .HasColumnType("text");
@@ -376,17 +398,14 @@ namespace middlerApp.Auth.Postgres.Migrations
                     b.Property<DateTime>("SecurityCodeExpirationDate")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<string>("Subject")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
+                    b.Property<string>("SecurityStamp")
+                        .HasColumnType("text");
 
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("boolean");
 
                     b.Property<string>("UserName")
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 

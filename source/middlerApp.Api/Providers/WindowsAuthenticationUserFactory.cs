@@ -33,9 +33,9 @@ namespace middlerApp.Api.Providers
             _providerCache = providerCache;
         }
 
-        public string GetSubject()
+        public Guid GetId()
         {
-            return FetchUserFromLdap().Subject;
+            return FetchUserFromLdap().Id;
         }
 
 
@@ -94,11 +94,12 @@ namespace middlerApp.Api.Providers
                 _mUser.FirstName = ldapObject.GetValueOrDefault<string>("GivenName");
                 _mUser.LastName = ldapObject.GetValueOrDefault<string>("sn");
                 _mUser.Active = true;
-                _mUser.Subject = ldapObject.GetValueOrDefault<Guid>("ObjectGuid").ToString();
+                //_mUser.Subject = ldapObject.GetValueOrDefault<Guid>("ObjectGuid").ToString();
                 _mUser.UserName = _claimsPrincipal.Identity?.Name;
                 _mUser.Email = ldapObject.GetValueOrDefault<string>("mail");
                 //_mUser.DisplayName = ldapObject.GetValueOrDefault<string>("displayname");
                 
+
                 if (_claimsPrincipal.Identity is WindowsIdentity wi)
                 {
                     

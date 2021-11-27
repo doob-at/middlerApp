@@ -34,7 +34,7 @@
     </li>
     <li nz-menu-divider *ngIf="context.Single"></li>
     <li nz-menu-item (click)="AddUser()">
-      <i nz-icon nzType="user-add" nzTheme="outline"></i>
+      <db-icon icon="user-add"></db-icon>
       Add User
     </li>
     <li nz-menu-item (click)="RemoveUser(context.SelectedData)" *ngIf="context.Any">

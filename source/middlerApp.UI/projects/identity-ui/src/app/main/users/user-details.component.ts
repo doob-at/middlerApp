@@ -39,7 +39,7 @@ export class UserDetailsComponent implements OnInit {
         private cref: ChangeDetectorRef
     ) {
         uiService.Set(ui => {
-            ui.Header.Title = "Identity User"
+            ui.Header.Title = "User"
             ui.Content.Scrollable = false;
             ui.Header.Icon = "fa#user"
 
@@ -86,8 +86,8 @@ export class UserDetailsComponent implements OnInit {
         }
 
         this.uiService.Set(ui => {
-            ui.Header.Title = "Identity User";
-            //ui.Header.SubTitle = user.UserName
+            ui.Header.Title = "User";
+            ui.Header.SubTitle = user?.UserName
             ui.Header.Icon = "form"
 
             ui.Footer.Button1.Visible = true;

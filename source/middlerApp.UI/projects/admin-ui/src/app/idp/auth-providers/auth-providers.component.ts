@@ -46,7 +46,7 @@ export class AuthProvidersComponent {
             //console.log("double Clicked", el)
 
         })
-        .StopEditingWhenGridLosesFocus()
+        .StopEditingWhenCellsLoseFocus()
         .OnGridSizeChange(ev => ev.api.sizeColumnsToFit())
         .OnViewPortClick((ev, api) => {
             api.deselectAll();

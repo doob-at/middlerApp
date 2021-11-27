@@ -64,7 +64,7 @@
 /// Conext Menu
 
 .ant-menu-light .ant-menu-item:hover, .ant-menu-light .ant-menu-item-active, .ant-menu-light .ant-menu:not(.ant-menu-inline) .ant-menu-submenu-open, .ant-menu-light .ant-menu-submenu-active, .ant-menu-light .ant-menu-submenu-title:hover {
-  color: $primary-color;
+  color: black;
 }
 
 .ant-menu-item-selected {
@@ -89,16 +89,16 @@
 }
 
 .ant-checkbox-checked:after {
-  border: 1px solid #292f3b;
+  border: 1px solid #525e76;;
 }
 
 .ant-checkbox-wrapper:hover .ant-checkbox-inner, .ant-checkbox:hover .ant-checkbox-inner, .ant-checkbox-input:focus + .ant-checkbox-inner {
-  border-color:  #292f3b;
+  border-color:  #525e76;;
 }
 
 .ant-checkbox-checked .ant-checkbox-inner {
-  background-color: #292f3b;
-    border-color: #292f3b;
+  background-color: #525e76;;
+    border-color: #525e76;;
 }
 
 .ant-select-focused:not(.ant-select-disabled).ant-select-multiple .ant-select-selector {
@@ -506,4 +506,17 @@ nz-tabset {
   line-height: 1.5715;
   font-size: 11px;
   border-radius: 1px;
+}
+
+.ant-menu-item>db-icon>fa-icon {
+  padding-right: 4px;
+}
+
+.ant-menu {
+  color: #525e76;
+}
+
+
+.not-confirmed .ag-cell {
+  opacity: .5;
 }

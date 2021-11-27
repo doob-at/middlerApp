@@ -1,0 +1,32 @@
+<div class="modal-header" style="padding: 10px !important; display:flex; margin-bottom: 1px;">
+    <div style="font-size: 2em;font-weight: bold; line-height: 1.4285em; color: whitesmoke; margin: auto;">
+        <ng-container class="Irgendwos" dbPortal="ActionModalHeader-Left" #left="dbPortal"></ng-container>
+        <div *ngIf="!left.hasSource">Action</div>
+    </div>
+    <div style="flex-grow: 1;"></div>
+    <div>
+        <ng-container dbPortal="ActionModalHeader-Right"></ng-container>
+    </div>
+</div>
+<div class="modal-content">
+    <ng-content></ng-content>
+</div>
+<div class="modal-footer">
+    
+    <button nz-button nzType="default" class="secondary" (click)="cancel.next()">Cancel</button>
+    <div style="flex-grow: 1;"></div>
+    <nz-button-group>
+        <button nz-button nzType="primary" (click)="ok.next()" [disabled]="!form.valid">Submit & Close</button>
+        
+        <button nz-button nzType="primary" nz-dropdown [nzDropdownMenu]="menu" [disabled]="!form.valid">
+            <i nz-icon nzType="ellipsis"></i>
+        </button>
+    </nz-button-group>
+</div>
+<nz-dropdown-menu #menu="nzDropdownMenu">
+    <ul nz-menu>
+        <li nz-menu-item (click)="save.next()">
+            <a>Save Action without close</a>
+        </li>
+    </ul>
+</nz-dropdown-menu>

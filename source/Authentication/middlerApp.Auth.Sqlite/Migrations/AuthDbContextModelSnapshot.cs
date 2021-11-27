@@ -14,7 +14,7 @@ namespace middlerApp.Auth.Sqlite.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "5.0.7");
+                .HasAnnotation("ProductVersion", "5.0.10");
 
             modelBuilder.Entity("MRoleMUser", b =>
                 {
@@ -204,6 +204,9 @@ namespace middlerApp.Auth.Sqlite.Migrations
                     b.Property<string>("ConsentType")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Description")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("DisplayName")
                         .HasColumnType("TEXT");
 
@@ -310,6 +313,9 @@ namespace middlerApp.Auth.Sqlite.Migrations
                     b.Property<bool>("BuiltIn")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("ConcurrencyStamp")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Description")
                         .HasColumnType("TEXT");
 
@@ -317,6 +323,9 @@ namespace middlerApp.Auth.Sqlite.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("NormalizedName")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -330,15 +339,16 @@ namespace middlerApp.Auth.Sqlite.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("AccessFailedCount")
+                        .HasColumnType("INTEGER");
+
                     b.Property<bool>("Active")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("ConcurrencyStamp")
-                        .IsConcurrencyToken()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Email")
-                        .HasMaxLength(200)
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("EmailConfirmed")
@@ -356,8 +366,20 @@ namespace middlerApp.Auth.Sqlite.Migrations
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("INTEGER");
 
+                    b.Property<DateTimeOffset?>("LockoutEnd")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("NormalizedEmail")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("NormalizedUserName")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Password")
                         .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PasswordHash")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("PhoneNumber")
@@ -373,16 +395,13 @@ namespace middlerApp.Auth.Sqlite.Migrations
                     b.Property<DateTime>("SecurityCodeExpirationDate")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Subject")
-                        .IsRequired()
-                        .HasMaxLength(200)
+                    b.Property<string>("SecurityStamp")
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("UserName")
-                        .HasMaxLength(200)
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");

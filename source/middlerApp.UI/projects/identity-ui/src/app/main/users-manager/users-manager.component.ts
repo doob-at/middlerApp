@@ -87,7 +87,7 @@ export class UsersManagerComponent implements ControlValueAccessor {
             //console.log("double Clicked", el)
 
         })
-        .StopEditingWhenGridLosesFocus()
+        .StopEditingWhenCellsLoseFocus()
         .OnGridSizeChange(ev => ev.api.sizeColumnsToFit())
         .OnViewPortClick((ev, api) => {
             api.deselectAll();

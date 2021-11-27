@@ -6,7 +6,7 @@ import { MRoleDto } from '../models/m-role-dto';
 import { GridBuilder, DefaultContextMenuContext } from '@doob-ng/grid';
 import { RoleGridCellComponent } from './role-grid-cell.component';
 import { DoobOverlayService, IOverlayHandle } from '@doob-ng/cdk-helper';
-import { IconGridCellComponent } from '../shared/components/icon-cell.component';
+import { IconGridCellComponent } from '../shared/components/icon-cell/icon-cell.component';
 import { RolesService } from "../roles/roles.service";
 import { RolesQuery } from "../roles/roles.store";
 

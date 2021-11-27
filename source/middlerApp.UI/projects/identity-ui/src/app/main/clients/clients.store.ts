@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
 import { StoreConfig, Query, Store, EntityState, EntityStore, QueryEntity } from '@datorama/akita';
-import { ClientListItem } from './client-list-item';
+import { MClientListDto } from './models/MClientListDto';
 
 
 
-interface ClientsState extends EntityState<ClientListItem, string> {
+
+interface ClientsState extends EntityState<MClientListDto, string> {
     
 }
 

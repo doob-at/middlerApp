@@ -29,7 +29,8 @@ export class AuthConfigService {
             logLevel: LogLevel.Warn,
             autoUserInfo: true,
             secureRoutes: ["_api/", "/_api/"],
-            storage: new CustomStorage()
+            storage: new CustomStorage(),
+            
         };
     }
 }

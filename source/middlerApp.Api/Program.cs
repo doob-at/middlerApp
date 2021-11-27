@@ -28,10 +28,12 @@ namespace middlerApp.Api
                 Log.Information("Starting host");
                 var idpHost = CreateIdpHost(args).Build();
                 var adminHost = CreateAdminHost(args).Build();
+                var middlerHost = CreateMiddlerHost(args).Build();
 
                 await Task.WhenAny(
                     idpHost.RunAsync(), 
-                    adminHost.RunAsync()
+                    adminHost.RunAsync(),
+                    middlerHost.RunAsync()
                 );
                 
                 return 0;
@@ -73,6 +75,20 @@ namespace middlerApp.Api
                     .UseWebRoot(PathHelper.GetFullPath(Static.StartUpConfiguration.AdminSettings.WebRoot))
                     .UseKestrel(ConfigureAdminKestrel)
                     .UseStartup<AdminStartup>()
+                );
+        }
+
+        public static IHostBuilder CreateMiddlerHost(string[] args)
+        {
+
+            return Host.CreateDefaultBuilder(args)
+                .UseSerilog()
+                .ConfigureAppConfiguration(BuildHostConfiguration)
+                .ConfigureWebHostDefaults(webBuilder => webBuilder
+                    .UseContentRoot(PathHelper.ContentPath)
+                    .UseWebRoot(PathHelper.GetFullPath(Static.StartUpConfiguration.AdminSettings.WebRoot))
+                    .UseKestrel(ConfigureMiddlerKestrel)
+                    .UseStartup<MiddlerStartup>()
                 );
         }
 
@@ -213,6 +229,34 @@ namespace middlerApp.Api
 
         }
 
+        private static void ConfigureMiddlerKestrel(WebHostBuilderContext context, KestrelServerOptions serverOptions)
+        {
+            
+            var config = context.Configuration.Get<StartUpConfiguration>();
+            config.SetDefaultSettings();
+
+            var listenIp = IPAddress.Parse(config.ListeningIP);
+
+            if (config.HttpPort.HasValue && config.HttpPort.Value != 0)
+            {
+                serverOptions.Listen(listenIp, config.HttpPort.Value, listenOptions =>
+                {
+                    listenOptions.Protocols = HttpProtocols.Http1AndHttp2;
+                });
+            }
+
+            if (config.HttpsPort.HasValue && config.HttpsPort.Value != 0)
+            {
+                var certPath = PathHelper.GetFullPath(config.HttpsCertPath);
+                Log.Debug(certPath);
+                serverOptions.Listen(listenIp, config.HttpsPort.Value, listenOptions =>
+                {
+                    listenOptions.Protocols = HttpProtocols.Http1AndHttp2;
+                    listenOptions.UseHttps(PathHelper.GetFullPath(config.HttpsCertPath), config.HttpsCertPassword);
+                });
+            }
+
+        }
 
     }
 

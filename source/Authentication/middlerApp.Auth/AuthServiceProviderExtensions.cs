@@ -39,6 +39,8 @@ namespace middlerApp.Auth
                 {
                     options.LoginPath = $"/login";
                     options.LogoutPath = "/logout";
+                    options.SlidingExpiration = true;
+                    options.ExpireTimeSpan = TimeSpan.FromDays(14);
                 }); ;
 
             services.AddDbContext<AuthDbContext>(options =>
@@ -76,9 +78,13 @@ namespace middlerApp.Auth
 
             services.AddScoped<IAuthenticationProviderService, AuthenticationProviderService>();
 
+            services.AddIdentity<MUser, MRole>()
+                .AddEntityFrameworkStores<AuthDbContext>()
+                .AddDefaultTokenProviders();
+
             services.AddScoped<IPasswordHasher<MUser>, PasswordHasher<MUser>>();
-            services.AddScoped<ILocalUserService, LocalUserService>();
-            services.AddScoped<IRolesService, RolesService>();
+            //services.AddScoped<ILocalUserService, LocalUserService>();
+            //services.AddScoped<IRolesService, RolesService>();
 
             services.Configure<IdentityOptions>(options =>
             {
@@ -126,7 +132,7 @@ namespace middlerApp.Auth
                     options.Services.TryAddSingleton<AuthScopeStoreResolver.TypeResolutionCache>();
                     options.Services.TryAddSingleton<AuthTokenStoreResolver.TypeResolutionCache>();
 
-                    options.Services.TryAddScoped(typeof(AuthApplicationStore));
+                    options.Services.TryAddScoped(typeof(ClientsStore));
                     options.Services.TryAddScoped(typeof(AuthAuthorizationStore));
                     options.Services.TryAddScoped(typeof(AuthScopeStore));
                     options.Services.TryAddScoped(typeof(AuthTokenStore));
@@ -150,7 +156,6 @@ namespace middlerApp.Auth
                         .AllowClientCredentialsFlow()
                         .AllowAuthorizationCodeFlow()
                         .AllowImplicitFlow();
-                        ;
 
 
                     options
@@ -172,7 +177,9 @@ namespace middlerApp.Auth
                         .DisableTransportSecurityRequirement()
                         .EnableTokenEndpointPassthrough()
                         .EnableUserinfoEndpointPassthrough()
-                        .EnableAuthorizationEndpointPassthrough();
+                        .EnableAuthorizationEndpointPassthrough()
+                        .EnableLogoutEndpointPassthrough()
+                        ;
 
                     //options.AddEventHandler(CustomValidateResourceOwnerCredentialsParameters.Descriptor);
 
@@ -183,6 +190,7 @@ namespace middlerApp.Auth
                 {
                     options.UseLocalServer();
                     options.UseAspNetCore();
+                    //options.AddAudiences("identityApi");
                     //options.SetIssuer("https://localhost:4444/");
                     //options.UseIntrospection();
                     //options.UseSystemNetHttp();

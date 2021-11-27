@@ -21,7 +21,7 @@ export class AuthConfigService {
             refreshTokenRetryInSeconds: 30,
             logLevel: LogLevel.Warn,
             autoUserInfo: true,
-            secureRoutes: ["_api/", "/_api/", "_test", "/_test"],
+            secureRoutes: ["_api/", "/_api/", "_test", "/_test", "/connect/", "connect/"],
             storage: new CustomStorage(),
             ignoreNonceAfterRefresh: true
             // customParamsAuthRequest: {

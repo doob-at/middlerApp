@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, HostListener, OnInit, TemplateRef, ViewChild, ViewContainerRef } from "@angular/core";
+import { ActivatedRoute, Router } from "@angular/router";
 import { DoobOverlayService, IOverlayHandle } from "@doob-ng/cdk-helper";
 import { DefaultContextMenuContext, GridBuilder } from "@doob-ng/grid";
 import { AppUIService } from "@shared/services";
@@ -16,18 +17,17 @@ export class ClientsComponent implements OnInit {
 
     @ViewChild('itemsContextMenu') itemsContextMenu!: TemplateRef<any>
 
-   
-    
-    
+
+
+
     grid = new GridBuilder<any>()
         .SetColumns(
             c => c.Default("ClientId")
                 .SetInitialWidth(200, true).SetLeftFixed()
                 .SetCssClass("pValue"),
-            c => c.Default("DisplayName"),
-            c => c.Default("AccessMode"),
-            c => c.Default("Client"),
-            c => c.Default("SourceAddress")
+            c => c.Default("DisplayName")
+                .SetInitialWidth(240, true),
+            c => c.Default("Description")
         )
         .OnCellContextMenu(ev => {
             const selected = ev.api.getSelectedNodes();
@@ -39,10 +39,11 @@ export class ClientsComponent implements OnInit {
             this.contextMenu = this.overlay.OpenContextMenu(ev.event as MouseEvent, this.itemsContextMenu, this.viewContainerRef, vContext)
         })
         .OnViewPortContextMenu((ev, api) => {
+            api.deselectAll();
             let vContext = new DefaultContextMenuContext(api, ev)
             this.contextMenu = this.overlay.OpenContextMenu(ev, this.itemsContextMenu, this.viewContainerRef, vContext)
         })
-        .StopEditingWhenGridLosesFocus()
+        .StopEditingWhenCellsLoseFocus()
         .OnGridSizeChange(ev => ev.api.sizeColumnsToFit())
         .OnViewPortClick((ev, api) => {
             api.deselectAll();
@@ -50,15 +51,19 @@ export class ClientsComponent implements OnInit {
         .WithRowSelection("multiple")
         .WithFullRowEditType()
         .WithShiftResizeMode()
-        
+        .OnRowDoubleClicked(el => {
+            this.EditClient(el.node.data);
+        })
         .SetData(this.adminquery.selectAll())
         .SetDataImmutable(data => data.ClientId)
 
     private contextMenu!: IOverlayHandle;
 
     constructor(
-        private appui: AppUIService, 
-        private adminapi: ClientsService, 
+        private appui: AppUIService,
+        private router: Router,
+        private route: ActivatedRoute,
+        private adminapi: ClientsService,
         private adminquery: ClientsQuery,
         public overlay: DoobOverlayService,
         public viewContainerRef: ViewContainerRef) {
@@ -73,15 +78,15 @@ export class ClientsComponent implements OnInit {
 
     ngOnInit() {
 
-        this.adminapi.GetApplications()
+        this.adminapi.GetClients()
     }
 
     AddClient() {
-        // this.router.navigate(["create"], { relativeTo: this.route })
+        this.router.navigate(["create"], { relativeTo: this.route })
     }
 
     EditClient(role: any) {
-        // this.router.navigate([role.Id], { relativeTo: this.route })
+        this.router.navigate([role.Id], { relativeTo: this.route })
     }
 
     RemoveClient(clients: Array<any>) {
@@ -90,6 +95,6 @@ export class ClientsComponent implements OnInit {
     }
 
     ReloadClientsList() {
-        this.adminapi.GetApplications()
+        this.adminapi.GetClients()
     }
 }

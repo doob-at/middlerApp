@@ -3,6 +3,7 @@ import { NgModule } from "@angular/core";
 import { ReactiveFormsModule } from "@angular/forms";
 import { GlobalImportsModule } from "@admin/global-imports.module";
 import { ClientsRoutingModule, RoutingComponents } from "./clients-routing.module";
+import { SimpleListModule } from "../shared/components/simple-list/simple-list.module";
 
 
 @NgModule({
@@ -10,7 +11,8 @@ import { ClientsRoutingModule, RoutingComponents } from "./clients-routing.modul
         CommonModule,
         GlobalImportsModule,
         ReactiveFormsModule,
-        ClientsRoutingModule
+        ClientsRoutingModule,
+        SimpleListModule
     ],
     declarations: [
         ...RoutingComponents

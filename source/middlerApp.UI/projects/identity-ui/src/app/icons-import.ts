@@ -5,7 +5,7 @@ import { faAddressCard as farAddressCard, faPlayCircle, faPlusSquare, faStopCirc
 import {
   DashboardOutline, FolderOutline, SettingOutline, FieldBinaryOutline, DeleteOutline,
   ContainerOutline, OrderedListOutline, CodeOutline, FormOutline, RollbackOutline, SyncOutline,
-  UserAddOutline, LoginOutline, BugOutline, LockOutline, UserOutline, MoreOutline, MenuUnfoldOutline
+  UserAddOutline, LoginOutline, BugOutline, LockOutline, UserOutline, MoreOutline, MenuUnfoldOutline, LogoutOutline
 } from '@ant-design/icons-angular/icons';
 
 export class IconsImport {
@@ -47,7 +47,7 @@ export class IconsImport {
     ContainerOutline, OrderedListOutline, CodeOutline, FormOutline, RollbackOutline,
     SyncOutline, UserAddOutline,
     LoginOutline,
-    BugOutline, LockOutline, UserOutline,
+    BugOutline, LockOutline, UserOutline, LogoutOutline,
     MoreOutline, MenuUnfoldOutline
   ]
 

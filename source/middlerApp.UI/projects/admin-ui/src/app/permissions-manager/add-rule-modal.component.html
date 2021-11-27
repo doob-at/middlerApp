@@ -1,0 +1,81 @@
+<div class="modal-header" style="padding: 10px !important; display:flex; margin-bottom: 1px;">
+    <div style="font-size: 2em;font-weight: bold; line-height: 1.4285em; color: whitesmoke; margin: auto;">
+        Permission Rule
+    </div>
+    <div style="flex-grow: 1;"></div>
+    <div>
+
+    </div>
+</div>
+<div class="modal-content">
+    <form nz-form [formGroup]="form" style="width: 100%;margin: 10px 0px;">
+
+
+        <div nz-row style="margin-bottom: 4px;">
+            <div nz-col nzSpan="10" nzOffset="1">
+                <nz-form-label nzRequired nzFor="Type">Type</nz-form-label>
+                <nz-form-control style="width: 100%;">
+                    <nz-select formControlName="Type" id="Type" style="width: 100%;">
+                        <nz-option nzValue="User" nzLabel="User"></nz-option>
+                        <nz-option nzValue="Role" nzLabel="Role"></nz-option>
+                        <nz-option nzValue="Authenticated" nzLabel="Authenticated"></nz-option>
+                        <nz-option nzValue="Everyone" nzLabel="Everyone"></nz-option>
+                    </nz-select>
+                </nz-form-control>
+            </div>
+
+            <div nz-col nzSpan="10" nzOffset="2">
+                <nz-form-label nzRequired nzFor="AccessMode">AccessMode</nz-form-label>
+                <nz-form-control style="width: 100%;">
+                    <nz-select formControlName="AccessMode" id="AccessMode" style="width: 100%;">
+                        <nz-option nzValue="Allow" nzLabel="Allow"></nz-option>
+                        <nz-option nzValue="Deny" nzLabel="Deny"></nz-option>
+                        <nz-option nzValue="Ignore" nzLabel="Ignore"></nz-option>
+                    </nz-select>
+                </nz-form-control>
+            </div>
+        </div>
+
+
+        <div nz-row style="margin-bottom: 4px;" *ngIf="IsEnabled('PrincipalName')">
+            <div nz-col nzSpan="22" nzOffset="1">
+                <nz-form-label nzRequired nzFor="PrincipalName">PrincipalName</nz-form-label>
+                <nz-form-control>
+                    <input nz-input formControlName="PrincipalName" id="PrincipalName" />
+                </nz-form-control>
+            </div>
+        </div>
+
+        <div nz-row style="margin-bottom: 4px;">
+            <div nz-col nzSpan="22" nzOffset="1">
+                <label class="select-label" nz-checkbox formControlName="BoundToClient">
+                    Bound To Client
+                </label>
+                <nz-form-control *ngIf="IsEnabled('Client')">
+                    <input nz-input formControlName="Client" id="Client" style="width: 100%;" />
+                </nz-form-control>
+            </div>
+        </div>
+
+        <div nz-row style="margin-bottom: 4px;">
+            <div nz-col nzSpan="22" nzOffset="1">
+                <label class="select-label" formControlName="BoundToSourceAddress"  nz-checkbox>
+                    Bound To SourceAddress
+                </label>
+                <nz-form-control *ngIf="IsEnabled('SourceAddress')">
+                    <input nz-input formControlName="SourceAddress" id="SourceAddress" style="width: 100%;" />
+                </nz-form-control>
+            </div>
+        </div>
+
+    </form>
+</div>
+<div class="modal-footer" >
+
+    <button nz-button nzType="default" class="secondary" (click)="cancel()">Cancel</button>
+    <div style="flex-grow: 1;"></div>
+    <nz-button-group>
+        <button nz-button nzType="primary" (click)="ok()" [disabled]="!form.valid">Submit & Close</button>
+
+    </nz-button-group>
+</div>
